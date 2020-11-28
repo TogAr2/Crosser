@@ -123,17 +123,34 @@ public:
     }
 
     void logic() {
-        if (direction == AUTO) {
-            if (x > fruitX) {
-                direction = LEFT;
-            } else if (x < fruitX) {
-                direction = RIGHT;
-            } else if (y > fruitY) {
-                direction = UP;
-            } else if (y < fruitY) {
-                direction = DOWN;
-            }
+            if (direction == AUTO) {
+    if (x > fruitX) {
+        if (fruitX - x > width/2 || fruitX - x < (0 - width)/2) {
+            direction = RIGHT;
+        } else {
+            direction = LEFT;
         }
+    } else if (x < fruitX) {
+        if (fruitX - x > width/2 || fruitX - x < (0 - width)/2) {
+            direction = LEFT;
+        } else {
+            direction = RIGHT;
+        }
+    } else if (y > fruitY) {
+        if (fruitY - y > height/2 || fruitY - y < (0 - height)/2) {
+            direction = DOWN;
+        } else {
+            direction = UP;
+        }
+    } else if (y < fruitY) {
+        if (fruitY - y > height/2 || fruitY - y < (0 - height)/2) {
+            direction = UP;
+        } else {
+            direction = DOWN;
+        }
+      direction = DOWN;
+    }
+  }
 
         switch (direction) {
         case UP:
