@@ -1,9 +1,7 @@
 #include <iostream>
-#include <unistd.h>
-#include <termios.h>
 
-#include "utils.hpp";
-#include "game.hpp"
+#include "utils.hpp"
+#include "game.cpp"
 
 using namespace std;
 
