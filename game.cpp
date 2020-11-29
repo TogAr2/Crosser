@@ -1,27 +1,36 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 enum Direction {
-  STOP = 0,
-  LEFT,
-  RIGHT,
-  UP,
-  DOWN,
-  AUTO
+    STOP = 0,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+    AUTO
+};
+
+enum BlockType {
+    AIR,
+    PLAYER,
+    FRUIT,
+    OBSTACLE
 };
 
 class Game {
 
-    const std::string explanation[20] = {
+    const string explanation[20] = {
         "",
-        "Welcome to Crosser v0.2",
+        "Welcome to Crosser v0.3",
         "",
         "Use WASD to move.",
         "",
         "Search for the cross.",
         "",
-        "Press M if you are a lazy person :/",
+        "Press M if you are a lazy",
+        "person :/",
         "",
         "Good luck!",
         "",
@@ -32,31 +41,71 @@ class Game {
         "",
         "",
         "",
-        "",
         ""
     };
-    const int width = 20;
-    const int height = 20;
+
+    const static int width = 40;
+    const static int height = 20;
+    BlockType map[20][40];
 
     bool gameOver;
     int x, y, fruitX, fruitY, score;
 
     Direction direction;
 
+    void addRandomObstacle() {
+        int obstacleX = (rand() % (width / 2)) * 2;
+        int obstacleY = (rand() % (height / 2)) * 2;
+
+        if (map[obstacleY][obstacleX] == AIR) {
+            map[obstacleY][obstacleX] = OBSTACLE;
+        } else {
+            addRandomObstacle();
+        }
+    }
+
+    bool isObstacle(int locX, int locY) {
+        return map[locY][locX] == OBSTACLE;
+    }
+
+    void setPlayerInMap(int locX, int locY) {
+        map[y][x] = AIR;
+
+        x = locX;
+        y = locY;
+
+        map[y][x] = PLAYER;
+    }
+
     void randomFruitLocation() {
         fruitX = rand() % width;
         fruitY = rand() % height;
+
+        if (map[fruitY][fruitX] == AIR) {
+            map[fruitY][fruitX] = FRUIT;
+        } else {
+            randomFruitLocation();
+        }
     }
 
 public:
     Game() {
         gameOver = false;
         direction = STOP;
-        x = width / 2;
-        y = height / 2;
         score = 0;
 
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                map[i][j] = AIR;
+            }
+        }
+
+        setPlayerInMap(width / 2, height / 2);
         randomFruitLocation();
+
+        for (int i = 0; i < 30; i++) {
+            addRandomObstacle();
+        }
     }
 
     void draw() {
@@ -71,10 +120,12 @@ public:
                     cout << "#";
                 }
 
-                if (i == y && j == x) {
-                    cout << "█";
-                } else if (i == fruitY && j == fruitX) {
+                if (map[i][j] == PLAYER) {
+                    cout << "O";
+                } else if (map[i][j] == FRUIT) {
                     cout << "X";
+                } else if (map[i][j] == OBSTACLE) {
+                    cout << "█";
                 } else {
                     cout << " ";
                 }
@@ -154,37 +205,45 @@ public:
         switch (direction) {
         case UP:
             if (y > 0) {
-                y--;
+                if (!isObstacle(x, y - 1)) {
+                    setPlayerInMap(x, y - 1);
+                }
             } else {
-                y = height - 1;
+                setPlayerInMap(x, height - 1);
             }
             break;
         case LEFT:
             if (x > 0) {
-                x--;
+                if (!isObstacle(x - 1, y)) {
+                    setPlayerInMap(x - 1, y);
+                }
             } else {
-                x = width - 1;
+                setPlayerInMap(width - 1, y);
             }
             break;
         case DOWN:
             if (y < height - 1) {
-                y++;
+                if (!isObstacle(x, y + 1)) {
+                    setPlayerInMap(x, y + 1);
+                }
             } else {
-                y = 0;
+                setPlayerInMap(x, 0);
             }
             break;
         case RIGHT:
             if (x < width - 1) {
-                x++;
+                if (!isObstacle(x + 1, y)) {
+                    setPlayerInMap(x + 1, y);
+                }
             } else {
-                x = 0;
+                setPlayerInMap(0, y);
             }
             break;
         default:
             break;
         }
 
-        if (x == fruitX && y == fruitY) {
+        if (y == fruitY && x == fruitX) {
             score++;
             randomFruitLocation();
         }
