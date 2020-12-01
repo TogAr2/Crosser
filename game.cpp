@@ -1,6 +1,10 @@
 #include <iostream>
+#include <random>
 
+#include "config.hpp"
 #include "utils.hpp"
+
+#include <SFML/Graphics.hpp>
 
 using namespace std;
 
@@ -22,9 +26,9 @@ enum BlockType {
 
 class Game {
 
-    const string explanation[20] = {
+    const string explanation[40] = {
         "",
-        "Welcome to Crosser v0.3",
+        "Welcome to Crosser v" + (string) CROSSER_VERSION,
         "",
         "Use WASD to move.",
         "",
@@ -47,16 +51,27 @@ class Game {
 
     const static int width = 40;
     const static int height = 20;
-    BlockType map[20][40];
+
+    const static int blockSize = 20;
+
+    BlockType map[20][40]{};
+
+    std::mt19937 random;
 
     bool gameOver;
-    int x, y, fruitX, fruitY, score;
+    int x{}, y{}, fruitX{}, fruitY{}, score;
 
     Direction direction;
 
+    sf::RenderWindow* window;
+    sf::Font mainFont;
+
     void addRandomObstacle() {
-        int obstacleX = (rand() % (width / 2)) * 2;
-        int obstacleY = (rand() % (height / 2)) * 2;
+        std::uniform_int_distribution<int> widthDistribution(0, width / 2);
+        std::uniform_int_distribution<int> heightDistribution(0, height / 2);
+
+        int obstacleX = widthDistribution(random) * 2;
+        int obstacleY = heightDistribution(random) * 2;
 
         if (map[obstacleY][obstacleX] == AIR) {
             map[obstacleY][obstacleX] = OBSTACLE;
@@ -79,8 +94,11 @@ class Game {
     }
 
     void randomFruitLocation() {
-        fruitX = rand() % width;
-        fruitY = rand() % height;
+        std::uniform_int_distribution<int> widthDistribution(0, width);
+        std::uniform_int_distribution<int> heightDistribution(0, height );
+
+        fruitX = widthDistribution(random);
+        fruitY = heightDistribution(random);
 
         if (map[fruitY][fruitX] == AIR) {
             map[fruitY][fruitX] = FRUIT;
@@ -90,14 +108,15 @@ class Game {
     }
 
 public:
-    Game() {
+    explicit Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
         gameOver = false;
         direction = STOP;
         score = 0;
+        this->window = window;
 
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                map[i][j] = AIR;
+        for (auto & i : map) {
+            for (auto & j : i) {
+                j = AIR;
             }
         }
 
@@ -107,71 +126,78 @@ public:
         for (int i = 0; i < 30; i++) {
             addRandomObstacle();
         }
+
+        std::random_device randomDevice;
+        random.seed(randomDevice());
+
+        sf::Font font;
+        if (!font.loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
+        	cout << "Error: Could not load font!" << endl;
+        }
+
+        mainFont = font;
     }
 
     void draw() {
-        system("clear"); //Clear
-        for (int i = 0; i < width+2; i++)
-            cout << "#";
-        cout << endl;
+        window->clear(sf::Color::Black);
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (j == 0) {
-                    cout << "#";
-                }
+            	if (map[i][j] == AIR) continue;
+
+            	sf::RectangleShape shape(sf::Vector2f(blockSize, blockSize));
+            	shape.setPosition((float) j * blockSize, (float) i * blockSize);
 
                 if (map[i][j] == PLAYER) {
-                    cout << "O";
+                	shape.setFillColor(sf::Color::Cyan);
+                    //cout << "O";
                 } else if (map[i][j] == FRUIT) {
-                    cout << "X";
+                	shape.setFillColor(sf::Color::Green);
+                    //cout << "X";
                 } else if (map[i][j] == OBSTACLE) {
-                    cout << "█";
-                } else {
-                    cout << " ";
+                	shape.setFillColor(sf::Color::Red);
+                    //cout << "█";
                 }
 
-                if (j == width - 1) {
-                    cout << "#";
-                }
+                window->draw(shape);
             }
 
-            cout << " " << explanation[i] << endl;
+            //cout << " " << explanation[i] << endl;
         }
 
-        for (int i = 0; i < width+2; i++)
-            cout << "#";
-        cout << endl;
+        //cout << "Score: " << score << endl;
 
-        cout << "Score: " << score << endl;
+        window->display();
     }
 
     void input() {
-        char input = getch();
+    	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+    		direction = UP;
+    		return;
+    	}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			direction = LEFT;
+			return;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			direction = DOWN;
+			return;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			direction = RIGHT;
+			return;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+			direction = AUTO;
+			return;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+			gameOver = true;
+			direction = STOP;
+			return;
+		}
 
-        switch (input) {
-            case 'w':
-            direction = UP;
-            break;
-        case 'a':
-            direction = LEFT;
-            break;
-        case 's':
-            direction = DOWN;
-            break;
-        case 'd':
-            direction = RIGHT;
-            break;
-        case 'm':
-            direction = AUTO;
-            break;
-        case 'q':
-            gameOver = true;
-            //No break here
-        default:
-            direction = STOP;
-            break;
-        }
+		direction = STOP;
     }
 
     void logic() {
@@ -250,11 +276,15 @@ public:
         }
     }
 
-    bool isGameOver() {
+    [[nodiscard]] bool isGameOver() const {
         return gameOver;
     }
 
-    int getScore() {
+    [[nodiscard]] int getScore() const {
         return score;
+    }
+
+    [[nodiscard]] sf::Font getMainFont() const {
+    	return mainFont;
     }
 };

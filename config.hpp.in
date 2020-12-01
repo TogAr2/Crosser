@@ -1,0 +1,1 @@
+#define CROSSER_VERSION "@Crosser_VERSION_MAJOR@.@Crosser_VERSION_MINOR@"
