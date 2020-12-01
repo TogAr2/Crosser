@@ -1,0 +1,1 @@
+#define CROSSER_VERSION "0.4"
