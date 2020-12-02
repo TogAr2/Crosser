@@ -5,7 +5,7 @@
 		<Option title="Crosser"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\Downloads\;CMake Files\..\..\Downloads\SFML-2.5.1\;CMake Files\..\..\Downloads\SFML-2.5.1\build\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\local\;CMake Files\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug"/>
@@ -46,9 +46,8 @@
 				<Compiler>
 					<Add directory="/Users/arnedalhuisen/CLionProjects/Crosser/SFML_INCLUDE_DIR"/>
 					<Add directory="/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug"/>
-					<Add directory="/Users/arnedalhuisen/Downloads/SFML-2.5.1/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
 					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
 					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
 					<Add directory="/System/Library/Frameworks"/>
@@ -70,9 +69,8 @@
 				<Compiler>
 					<Add directory="/Users/arnedalhuisen/CLionProjects/Crosser/SFML_INCLUDE_DIR"/>
 					<Add directory="/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug"/>
-					<Add directory="/Users/arnedalhuisen/Downloads/SFML-2.5.1/include"/>
-					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
 					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"/>
 					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0/include"/>
 					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
 					<Add directory="/System/Library/Frameworks"/>
@@ -89,7 +87,16 @@
 		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/game.cpp">
 			<Option target="Crosser"/>
 		</Unit>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/game.hpp">
+			<Option target="Crosser"/>
+		</Unit>
 		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/main.cpp">
+			<Option target="Crosser"/>
+		</Unit>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/tile.cpp">
+			<Option target="Crosser"/>
+		</Unit>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp">
 			<Option target="Crosser"/>
 		</Unit>
 		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/utils.cpp">
@@ -104,17 +111,20 @@
 		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/config.hpp.in">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
-		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../Downloads/SFML-2.5.1/build/SFMLConfig.cmake">
-			<Option virtualFolder="CMake Files\..\..\Downloads\SFML-2.5.1\build\"/>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../../../usr/local/lib/cmake/SFML/SFMLConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\"/>
 		</Unit>
-		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../Downloads/SFML-2.5.1/build/SFMLConfigDependencies.cmake">
-			<Option virtualFolder="CMake Files\..\..\Downloads\SFML-2.5.1\build\"/>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../../../usr/local/lib/cmake/SFML/SFMLConfigDependencies.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\"/>
 		</Unit>
-		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../Downloads/SFML-2.5.1/build/SFMLConfigVersion.cmake">
-			<Option virtualFolder="CMake Files\..\..\Downloads\SFML-2.5.1\build\"/>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../../../usr/local/lib/cmake/SFML/SFMLConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\"/>
 		</Unit>
-		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../Downloads/SFML-2.5.1/build/SFMLSharedTargets.cmake">
-			<Option virtualFolder="CMake Files\..\..\Downloads\SFML-2.5.1\build\"/>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../../../usr/local/lib/cmake/SFML/SFMLSharedTargets-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\"/>
+		</Unit>
+		<Unit filename="/Users/arnedalhuisen/CLionProjects/Crosser/../../../../usr/local/lib/cmake/SFML/SFMLSharedTargets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\SFML\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>

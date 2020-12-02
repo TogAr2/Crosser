@@ -2,27 +2,43 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "utils.hpp"
-#include "game.cpp"
+#include "game.hpp"
 #include "config.hpp"
 
+#include <chrono>
+
 using namespace std;
+using namespace std::chrono_literals;
+
+constexpr std::chrono::nanoseconds timestep(50ms);
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(840, 840), "Crosser v" + (string) CROSSER_VERSION);
+    sf::RenderWindow window(sf::VideoMode(760, 760), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
 
   	Game game(&window);
-  	game.draw();
+  	game.draw(0);
+
+  	using clock = std::chrono::high_resolution_clock;
+
+  	std::chrono::nanoseconds lag(0ns);
+  	auto time_start = clock::now();
 
   	while (!game.isGameOver() && window.isOpen()) {
-  		sf::Event event{};
-  		window.pollEvent(event);
+  		auto delta_time = clock::now() - time_start;
+  		time_start = clock::now();
+  		lag += std::chrono::duration_cast<std::chrono::nanoseconds>(delta_time);
 
-    	game.input();
-    	game.logic();
-    	game.draw();
+  		//Update game logic as lag permits
+  		while (lag >= timestep) {
+  			lag -= timestep;
 
-    	sf::sleep(sf::milliseconds(80));
+			game.input();
+  			game.logic(); //Update at a fixed state each time
+  		}
+
+  		//Calculate how close or far we are from the next timestep
+  		float alpha = (float) lag.count() / timestep.count();
+  		game.draw(alpha);
   	}
 
   	if (window.isOpen()) {

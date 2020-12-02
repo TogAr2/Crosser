@@ -197,6 +197,33 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Crosser.dir/build.make CMakeFiles/Crosser.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+tile.o: tile.cpp.o
+
+.PHONY : tile.o
+
+# target to build an object file
+tile.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Crosser.dir/build.make CMakeFiles/Crosser.dir/tile.cpp.o
+.PHONY : tile.cpp.o
+
+tile.i: tile.cpp.i
+
+.PHONY : tile.i
+
+# target to preprocess a source file
+tile.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Crosser.dir/build.make CMakeFiles/Crosser.dir/tile.cpp.i
+.PHONY : tile.cpp.i
+
+tile.s: tile.cpp.s
+
+.PHONY : tile.s
+
+# target to generate assembly for a file
+tile.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Crosser.dir/build.make CMakeFiles/Crosser.dir/tile.cpp.s
+.PHONY : tile.cpp.s
+
 utils.o: utils.cpp.o
 
 .PHONY : utils.o
@@ -239,6 +266,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... tile.o"
+	@echo "... tile.i"
+	@echo "... tile.s"
 	@echo "... utils.o"
 	@echo "... utils.i"
 	@echo "... utils.s"

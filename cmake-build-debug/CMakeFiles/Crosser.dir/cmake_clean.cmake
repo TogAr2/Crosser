@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Crosser.dir/game.cpp.o"
   "CMakeFiles/Crosser.dir/main.cpp.o"
+  "CMakeFiles/Crosser.dir/tile.cpp.o"
   "CMakeFiles/Crosser.dir/utils.cpp.o"
   "Crosser"
   "Crosser.pdb"

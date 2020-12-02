@@ -6,29 +6,33 @@
 
 #IncludeRegexTransform: 
 
-/Users/arnedalhuisen/CLionProjects/Crosser/game.cpp
+/Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
 iostream
 -
 random
 -
+list
+-
 config.hpp
 /Users/arnedalhuisen/CLionProjects/Crosser/config.hpp
-utils.hpp
-/Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
-SFML/Graphics.hpp
--
+tile.hpp
+/Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp
 
-/Users/arnedalhuisen/CLionProjects/Crosser/main.cpp
+/Users/arnedalhuisen/CLionProjects/Crosser/tile.cpp
+game.hpp
+/Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
 iostream
 -
+
+/Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp
 SFML/Graphics.hpp
 -
+list
+-
+game.hpp
+/Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
 utils.hpp
 /Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
-game.cpp
-/Users/arnedalhuisen/CLionProjects/Crosser/game.cpp
-config.hpp
-/Users/arnedalhuisen/CLionProjects/Crosser/config.hpp
 
 /Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
 

@@ -245,6 +245,9 @@ Crosser_SOURCE_DIR:STATIC=/Users/arnedalhuisen/CLionProjects/Crosser
 //Path to a program.
 ProcessorCount_cmd_sysctl:FILEPATH=/usr/sbin/sysctl
 
+//The directory containing a CMake configuration file for SFML.
+SFML_DIR:PATH=/usr/local/lib/cmake/SFML
+
 //Path to a file.
 SFML_DOC_DIR:PATH=SFML_DOC_DIR-NOTFOUND
 

@@ -3,6 +3,8 @@
 
 CMakeFiles/Crosser.dir/game.cpp.o
  /Users/arnedalhuisen/CLionProjects/Crosser/game.cpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp
  /Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
  /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Config.hpp
  /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics.hpp
@@ -80,8 +82,89 @@ CMakeFiles/Crosser.dir/game.cpp.o
  /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/WindowStyle.hpp
  config.hpp
 CMakeFiles/Crosser.dir/main.cpp.o
- /Users/arnedalhuisen/CLionProjects/Crosser/game.cpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
  /Users/arnedalhuisen/CLionProjects/Crosser/main.cpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Config.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/BlendMode.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/CircleShape.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Color.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/ConvexShape.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Drawable.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Export.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Font.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Glsl.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Glsl.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Glyph.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Image.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/PrimitiveType.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Rect.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Rect.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/RectangleShape.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/RenderStates.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/RenderTarget.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/RenderTexture.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/RenderWindow.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Shader.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Shape.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Sprite.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Text.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Texture.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Transform.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Transformable.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/Vertex.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/VertexArray.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/VertexBuffer.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics/View.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Clock.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Err.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Export.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/FileInputStream.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/InputStream.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Lock.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/MemoryInputStream.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Mutex.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/NonCopyable.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Sleep.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/String.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/String.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Thread.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Thread.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/ThreadLocal.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/ThreadLocalPtr.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/ThreadLocalPtr.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Time.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Utf.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Utf.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Vector2.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Vector2.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Vector3.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/System/Vector3.inl
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Clipboard.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Context.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/ContextSettings.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Cursor.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Event.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Export.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/GlResource.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Joystick.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Keyboard.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Mouse.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Sensor.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Touch.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/VideoMode.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/Window.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/WindowHandle.hpp
+ /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Window/WindowStyle.hpp
+ config.hpp
+CMakeFiles/Crosser.dir/tile.cpp.o
+ /Users/arnedalhuisen/CLionProjects/Crosser/game.hpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/tile.cpp
+ /Users/arnedalhuisen/CLionProjects/Crosser/tile.hpp
  /Users/arnedalhuisen/CLionProjects/Crosser/utils.hpp
  /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Config.hpp
  /Users/arnedalhuisen/Downloads/SFML-2.5.1/include/SFML/Graphics.hpp

@@ -38,10 +38,11 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.17.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.17.3/CMakeSystem.cmake"
   "../config.hpp.in"
-  "/Users/arnedalhuisen/Downloads/SFML-2.5.1/build/SFMLConfig.cmake"
-  "/Users/arnedalhuisen/Downloads/SFML-2.5.1/build/SFMLConfigDependencies.cmake"
-  "/Users/arnedalhuisen/Downloads/SFML-2.5.1/build/SFMLConfigVersion.cmake"
-  "/Users/arnedalhuisen/Downloads/SFML-2.5.1/build/SFMLSharedTargets.cmake"
+  "/usr/local/lib/cmake/SFML/SFMLConfig.cmake"
+  "/usr/local/lib/cmake/SFML/SFMLConfigDependencies.cmake"
+  "/usr/local/lib/cmake/SFML/SFMLConfigVersion.cmake"
+  "/usr/local/lib/cmake/SFML/SFMLSharedTargets-release.cmake"
+  "/usr/local/lib/cmake/SFML/SFMLSharedTargets.cmake"
   )
 
 # The corresponding makefile is:

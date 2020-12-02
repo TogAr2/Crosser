@@ -10,12 +10,12 @@ set(SFML_LIBRARY_DIR "SFML/build/lib")
 link_directories(SFML_LIBRARY_DIR)
 include_directories(SFML_INCLUDE_DIR)
 
-set(SFML_DIR "/Users/arnedalhuisen/Downloads/SFML-2.5.1/build")
+set(SFML_DIR "/usr/local/Cellar/sfml/2.5.1/lib")
 
 find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
 
 configure_file(config.hpp.in config.hpp)
-add_executable(Crosser main.cpp game.cpp utils.cpp)
+add_executable(Crosser main.cpp game.cpp utils.cpp tile.cpp tile.hpp)
 
 target_link_libraries(Crosser sfml-graphics sfml-window sfml-system)
 target_include_directories(Crosser PUBLIC "${PROJECT_BINARY_DIR}")

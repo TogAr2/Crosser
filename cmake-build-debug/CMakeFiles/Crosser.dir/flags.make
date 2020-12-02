@@ -6,5 +6,5 @@ CXX_FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sd
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/arnedalhuisen/CLionProjects/Crosser/SFML_INCLUDE_DIR -I/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug -isystem /Users/arnedalhuisen/Downloads/SFML-2.5.1/include 
+CXX_INCLUDES = -I/Users/arnedalhuisen/CLionProjects/Crosser/SFML_INCLUDE_DIR -I/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug -isystem /usr/local/include 
 

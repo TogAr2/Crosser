@@ -6,6 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/arnedalhuisen/CLionProjects/Crosser/game.cpp" "/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug/CMakeFiles/Crosser.dir/game.cpp.o"
   "/Users/arnedalhuisen/CLionProjects/Crosser/main.cpp" "/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug/CMakeFiles/Crosser.dir/main.cpp.o"
+  "/Users/arnedalhuisen/CLionProjects/Crosser/tile.cpp" "/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug/CMakeFiles/Crosser.dir/tile.cpp.o"
   "/Users/arnedalhuisen/CLionProjects/Crosser/utils.cpp" "/Users/arnedalhuisen/CLionProjects/Crosser/cmake-build-debug/CMakeFiles/Crosser.dir/utils.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
@@ -14,7 +15,7 @@ set(CMAKE_CXX_COMPILER_ID "AppleClang")
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../SFML_INCLUDE_DIR"
   "."
-  "/Users/arnedalhuisen/Downloads/SFML-2.5.1/include"
+  "/usr/local/include"
   )
 
 # Targets to which this target links.
