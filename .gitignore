@@ -1,3 +1,5 @@
 /.DS_Store
 /.vscode
 /out
+/cmake-build-release/
+/cmake-build-debug/
