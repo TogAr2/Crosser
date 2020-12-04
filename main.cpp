@@ -13,7 +13,8 @@ using namespace std::chrono_literals;
 constexpr std::chrono::nanoseconds timestep(50ms);
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(760, 760), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
+    window.setFramerateLimit(60);
 
   	Game game(&window);
   	game.draw(0);

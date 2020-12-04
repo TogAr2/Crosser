@@ -30,11 +30,14 @@ void Game::setPlayerInMap(int locX, int locY) {
 }
 
 void Game::randomFruitLocation() {
-	std::uniform_int_distribution<int> widthDistribution(0, width - 1);
-	std::uniform_int_distribution<int> heightDistribution(0, height - 1);
+	sf::Vector2<float> viewSize = window->getView().getSize();
+	sf::Vector2<float> viewOrigin = sf::Vector2<float>(window->getView().getCenter().x - (viewSize.x / 2), window->getView().getCenter().y - (viewSize.y / 2));
 
-	fruitX = widthDistribution(random);
-	fruitY = heightDistribution(random);
+	std::uniform_int_distribution<int> widthDistribution(viewOrigin.x, viewOrigin.x + viewSize.x - 1);
+	std::uniform_int_distribution<int> heightDistribution(viewOrigin.y, viewOrigin.y + viewSize.y - 1);
+
+	fruitX = widthDistribution(random) / blockSize;
+	fruitY = heightDistribution(random) / blockSize;
 
 	if (map[fruitX][fruitY].getType() == AIR) {
 		map[fruitX][fruitY].setType(FRUIT);
@@ -108,10 +111,10 @@ bool Game::bfs() {
 		draw(0);
 	}
 
-	for (auto & i : map) {
-		for (auto & j : i) {
-			if (j.getType() == VISITED) {
-				j.setType(AIR);
+	for (auto & loopX : map) {
+		for (auto & loopY : loopX) {
+			if (loopY.getType() == VISITED) {
+				loopY.setType(AIR);
 			}
 		}
 	}
@@ -128,8 +131,11 @@ bool Game::bfs() {
 Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 	gameOver = false;
 	direction = STOP;
+	moving = STOP;
 	score = 0;
 	this->window = window;
+
+	random.seed(time(nullptr) * 5);
 
 	for (int loopX = 0; loopX < width; loopX++) {
 		for (int loopY = 0; loopY < height; loopY++) {
@@ -138,15 +144,18 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 		}
 	}
 
+	sf::View view = sf::View();
+	view.setCenter((float) width / 2, (float) height / 2);
+	view.reset(sf::FloatRect(0, 0, window->getSize().x, window->getSize().y));
+	view.zoom(zoom);
+	window->setView(view);
+
 	setPlayerInMap(width / 2, height / 2);
 	randomFruitLocation();
 
 	for (int i = 0; i < 30; i++) {
 		addRandomObstacle();
 	}
-
-	std::random_device randomDevice;
-	random.seed(randomDevice());
 
 	sf::Font font;
 	if (!font.loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
@@ -168,6 +177,17 @@ void Game::draw(float alpha) {
 	}
 
 	//cout << "Score: " << score << endl;
+
+	sf::View view = sf::View();
+
+	view.setCenter((float) width / 2, (float) height / 2);
+	view.reset(sf::FloatRect(0, 0, window->getSize().x, window->getSize().y));
+
+	//Interpolate zoom
+	float newZoom = zoom + ((zoom - previousZoom) * alpha / (float) maxWaitBeforeZoom) - (zoom - previousZoom);
+	view.zoom(newZoom);
+
+	window->setView(view);
 
 	window->display();
 }
@@ -193,12 +213,20 @@ void Game::input() {
 			} else if (event.key.code == sf::Keyboard::B) {
 				std::cout << "Player: " << x << " " << y << std::endl;
 				std::cout << "Fruit: " << fruitX << " " << fruitY << std::endl;
+			} else if (event.key.code == sf::Keyboard::U) {
+				setZoom(zoom + 0.1f);
 			}
 		}
 	}
 }
 
 void Game::logic() {
+	if (waitBeforeZoom == 0) {
+		previousZoom = zoom;
+	} else {
+		waitBeforeZoom--;
+	}
+
 	moving = STOP;
 
 	if (direction == AUTO) {
@@ -304,4 +332,10 @@ void Game::logic() {
 
 [[nodiscard]] sf::Font Game::getMainFont() const {
 	return mainFont;
+}
+
+void Game::setZoom(float newZoom) {
+	previousZoom = zoom;
+	zoom = newZoom;
+	waitBeforeZoom = maxWaitBeforeZoom;
 }

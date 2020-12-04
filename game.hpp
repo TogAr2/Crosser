@@ -42,6 +42,10 @@ public:
 private:
 	bool gameOver;
 	int x{}, y{}, fruitX{}, fruitY{}, score;
+	float zoom = 0.1;
+	float previousZoom = 0.1;
+	int waitBeforeZoom = 0;
+	int maxWaitBeforeZoom = 3;
 
 	sf::RenderWindow* window;
 	sf::Font mainFont;
@@ -64,6 +68,8 @@ public:
 	[[nodiscard]] bool isGameOver() const;
 	[[nodiscard]] int getScore() const;
 	[[nodiscard]] sf::Font getMainFont() const;
+
+	void setZoom(float zoom);
 };
 
 #endif //CROSSER_GAME_HPP
