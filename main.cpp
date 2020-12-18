@@ -7,12 +7,16 @@
 
 #include <chrono>
 
+#include "pluginManager.hpp"
+
 using namespace std;
 using namespace std::chrono_literals;
 
 constexpr std::chrono::nanoseconds timestep(50ms);
 
 int main() {
+	PluginManager::instance.start();
+
     sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(60);
 
@@ -58,6 +62,8 @@ int main() {
 			}
 		}
 	}
+
+  	PluginManager::instance.end();
 
   	return 0;
 }

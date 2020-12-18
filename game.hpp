@@ -7,12 +7,16 @@
 
 #include "config.hpp"
 #include "tile.hpp"
+#include "api-utils.hpp"
+#include "IGame.hpp"
+
+#include "pluginManager.hpp"
 
 const std::string explanation[height] = {
 		"",
 		"Welcome to Crosser v" + (std::string) CROSSER_VERSION,
 		"",
-		"Use WASD to move.",
+		"Use WASD to movePlayer.",
 		"",
 		"Search for the cross.",
 		"",
@@ -31,17 +35,20 @@ const std::string explanation[height] = {
 		""
 };
 
-class Game {
+class Game : public crs::IGame {
 	std::mt19937 random;
 
 public:
-	Tile map[width][height];
-	Direction direction;
-	Direction moving;
+	crs::Direction direction;
+	crs::Direction moving;
 
 private:
+	Tile map[width][height];
+
 	bool gameOver;
-	int x{}, y{}, fruitX{}, fruitY{}, score;
+	crs::Location* fruitLocation = nullptr;
+	crs::Location* playerLocation = nullptr;
+	int score;
 	float zoom = 0.1;
 	float previousZoom = 0.1;
 	int waitBeforeZoom = 0;
@@ -52,14 +59,15 @@ private:
 
 	void addRandomObstacle();
 	bool isObstacle(int locX, int locY);
-	void setPlayerInMap(int locX, int locY);
-	void randomFruitLocation();
+	void setPlayerInMap(crs::Location* location);
+	crs::Location *randomFruitLocation();
 
 	int moveCount = 0;
 	bool bfs();
 
 public:
 	explicit Game(sf::RenderWindow* window);
+	~Game();
 
 	void draw(float alpha);
 	void input();
@@ -70,6 +78,11 @@ public:
 	[[nodiscard]] sf::Font getMainFont() const;
 
 	void setZoom(float zoom);
+	void setFruitLocation(crs::Location *location);
+	bool movePlayer(crs::Direction moveDirection);
+
+	void setTileType(const crs::Location& location, crs::TileType type);
+	crs::TileType getTileType(const crs::Location& location);
 };
 
 #endif //CROSSER_GAME_HPP

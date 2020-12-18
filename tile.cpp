@@ -1,37 +1,37 @@
 #include "game.hpp"
 #include <iostream>
 
-void Tile::draw(sf::RenderWindow* window, const float& alpha, const Direction& moving) {
-	if (type == AIR) return;
+void Tile::draw(sf::RenderWindow* window, const float& alpha, const crs::Direction& moving) {
+	if (type == crs::AIR) return;
 
 	sf::RectangleShape shape(sf::Vector2f(blockSize, blockSize));
 	shape.setPosition((float) x * blockSize, (float) y * blockSize);
 
-	if (type == PLAYER) {
-		if (moving == UP) {
+	if (type == crs::PLAYER) {
+		if (moving == crs::UP) {
 			shape.move(0, (-1 * blockSize * alpha) + blockSize);
-		} else if (moving == DOWN) {
+		} else if (moving == crs::DOWN) {
 			shape.move(0, (blockSize * alpha) - blockSize);
-		} else if (moving == LEFT) {
+		} else if (moving == crs::LEFT) {
 			shape.move((-1 * blockSize * alpha) + blockSize, 0);
-		} else if (moving == RIGHT) {
+		} else if (moving == crs::RIGHT) {
 			shape.move((blockSize * alpha) - blockSize, 0);
 		}
 
 		shape.setFillColor(sf::Color::Cyan);
-	} else if (type == FRUIT) {
+	} else if (type == crs::FRUIT) {
 		shape.setFillColor(sf::Color::Green);
-	} else if (type == OBSTACLE) {
+	} else if (type == crs::OBSTACLE) {
 		shape.setFillColor(sf::Color::Red);
-	} else if (type == VISITED) {
+	} else if (type == crs::VISITED) {
 		shape.setFillColor(sf::Color::Magenta);
 	}
 
 	window->draw(shape);
 }
 
-Tile::Tile(): x(0), y(0), type(AIR) {}
-Tile::Tile(int x, int y, BlockType type): x(x), y(y), type(type) {}
+Tile::Tile(): x(0), y(0), type(crs::AIR) {}
+Tile::Tile(int x, int y, crs::TileType type): x(x), y(y), type(type) {}
 
 int Tile::getX() const {
 	return x;
@@ -41,11 +41,11 @@ int Tile::getY() const {
 	return y;
 }
 
-BlockType Tile::getType() const {
+crs::TileType Tile::getType() const {
 	return type;
 }
 
-void Tile::setType(BlockType blockType) {
+void Tile::setType(crs::TileType blockType) {
 	Tile::type = blockType;
 }
 
@@ -61,19 +61,19 @@ bool PathfinderTile::isFirst() const {
 	return previous == this;
 }
 
-PathfinderTile &PathfinderTile::getPrevious() const {
-	return *previous;
+PathfinderTile* PathfinderTile::getPrevious() const {
+	return previous;
 }
 
 void PathfinderTile::setPrevious(PathfinderTile* previous) {
 	PathfinderTile::previous = previous;
 }
 
-PathfinderTile::PathfinderTile(int x, int y, PathfinderTile* previous) : Tile(x, y, AIR),
+PathfinderTile::PathfinderTile(int x, int y, PathfinderTile* previous) : Tile(x, y, crs::AIR),
 																						 previous(previous) {}
-PathfinderTile::PathfinderTile(int x, int y) : Tile(x, y, AIR) {}
+PathfinderTile::PathfinderTile(int x, int y) : Tile(x, y, crs::AIR) {}
 
-std::list<PathfinderTile> PathfinderTile::getAdjacentTiles(const Game& game) {
+std::list<PathfinderTile> PathfinderTile::getAdjacentTiles(Game* game) {
 	int offsetX[] = { 1, 0, -1, 0 };
 	int offsetY[] = { 0, 1, 0, -1 };
 
@@ -101,7 +101,7 @@ std::list<PathfinderTile> PathfinderTile::getAdjacentTiles(const Game& game) {
 			queue.emplace_back(newX, 0);
 		} else if (newX >= width) {
 			queue.emplace_back(0, newY);
-		} else if (game.map[newX][newY].getType() != OBSTACLE) {
+		} else if (game->getTileType(crs::Location(newX, newY)) != crs::OBSTACLE) {
 			list.emplace_back(newX, newY, this);
 		}
 	}
