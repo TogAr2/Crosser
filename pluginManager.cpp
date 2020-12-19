@@ -74,7 +74,12 @@ void PluginManager::broadcastEvent(crs::Event *&event) {
 }
 
 void PluginManager::start() {
-	for (const auto & entry : std::filesystem::directory_iterator(PLUGIN_FOLDER)) {
+	std::filesystem::path folder(PLUGIN_FOLDER);
+	if (!std::filesystem::exists(folder)) {
+		std::filesystem::create_directory(folder);
+	}
+
+	for (const auto & entry : std::filesystem::directory_iterator(folder)) {
 		loadDynamicPlugin(entry.path().string().c_str());
 		Logger::info("Loaded plugin " + entry.path().filename().string());
 	}

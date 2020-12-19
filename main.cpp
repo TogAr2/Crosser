@@ -18,7 +18,7 @@ int main() {
 	PluginManager::instance.start();
 
     sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(120);
 
   	Game game(&window);
   	game.draw(0);

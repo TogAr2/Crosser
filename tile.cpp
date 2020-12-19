@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include <iostream>
+#include <logger.hpp>
 
 void Tile::draw(sf::RenderWindow* window, const float& alpha, const crs::Direction& moving) {
 	if (type == crs::AIR) return;
