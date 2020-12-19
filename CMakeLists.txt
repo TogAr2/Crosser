@@ -6,6 +6,8 @@ include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl -lpthread")
+
 set(CROSSER_PLUGIN_FOLDER "./plugins/")
 
 find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
