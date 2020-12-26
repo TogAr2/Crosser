@@ -5,7 +5,7 @@
 #include <list>
 
 #include "game.hpp"
-#include "utils.hpp"
+#include "../plugins/utils.hpp"
 #include "api-utils.hpp"
 
 class Tile {
@@ -19,7 +19,7 @@ public:
 	Tile();
 	Tile(int x, int y, crs::TileType type);
 
-	void draw(sf::RenderWindow* window, const float& alpha, const crs::Direction& moving);
+	void draw(sf::RenderWindow* window);
 
 	[[nodiscard]] int getX() const;
 	void setX(int x);

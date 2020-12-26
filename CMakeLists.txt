@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Crosser VERSION 1.2)
+project(Crosser VERSION 1.3)
 
 include(GNUInstallDirs)
 
@@ -13,10 +13,10 @@ set(CROSSER_PLUGIN_FOLDER "./plugins/")
 find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
 find_package(CrosserAPI REQUIRED)
 
-configure_file(config.hpp.in config.hpp)
-add_executable(Crosser main.cpp game.cpp utils.cpp tile.cpp tile.hpp pluginManager.cpp pluginManager.hpp)
+configure_file(main/config.hpp.in config.hpp)
+add_executable(Crosser main/main.cpp game/game.cpp game/tile.cpp game/tile.hpp plugins/pluginManager.cpp plugins/pluginManager.hpp multiplayer/network.cpp multiplayer/network.hpp multiplayer/player.cpp multiplayer/player.hpp)
 
-target_link_libraries(Crosser PUBLIC CrosserAPI sfml-graphics sfml-window sfml-system)
+target_link_libraries(Crosser PUBLIC CrosserAPI sfml-graphics sfml-window sfml-system sfml-network)
 
 target_include_directories(Crosser PUBLIC "${PROJECT_BINARY_DIR}")
 target_include_directories(Crosser PUBLIC "${CMAKE_INSTALL_FULL_INCLUDEDIR}/CrosserAPI")

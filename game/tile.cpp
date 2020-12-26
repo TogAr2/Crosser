@@ -2,25 +2,13 @@
 #include <iostream>
 #include <logger.hpp>
 
-void Tile::draw(sf::RenderWindow* window, const float& alpha, const crs::Direction& moving) {
+void Tile::draw(sf::RenderWindow* window) {
 	if (type == crs::AIR) return;
 
 	sf::RectangleShape shape(sf::Vector2f(blockSize, blockSize));
 	shape.setPosition((float) x * blockSize, (float) y * blockSize);
 
-	if (type == crs::PLAYER) {
-		if (moving == crs::UP) {
-			shape.move(0, (-1 * blockSize * alpha) + blockSize);
-		} else if (moving == crs::DOWN) {
-			shape.move(0, (blockSize * alpha) - blockSize);
-		} else if (moving == crs::LEFT) {
-			shape.move((-1 * blockSize * alpha) + blockSize, 0);
-		} else if (moving == crs::RIGHT) {
-			shape.move((blockSize * alpha) - blockSize, 0);
-		}
-
-		shape.setFillColor(sf::Color::Cyan);
-	} else if (type == crs::FRUIT) {
+	if (type == crs::FRUIT) {
 		shape.setFillColor(sf::Color::Green);
 	} else if (type == crs::OBSTACLE) {
 		shape.setFillColor(sf::Color::Red);

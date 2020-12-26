@@ -1,6 +1,6 @@
 #include "game.hpp"
-#include "pluginManager.hpp"
 #include "logger.hpp"
+#include "currentGame.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -20,16 +20,6 @@ void Game::addRandomObstacle() {
 
 bool Game::isObstacle(int locX, int locY) {
 	return map[locX][locY].getType() == crs::OBSTACLE;
-}
-
-void Game::setPlayerInMap(crs::Location* location) {
-	if (playerLocation != nullptr) {
-		setTileType(*playerLocation, crs::AIR);
-	}
-	delete playerLocation;
-
-	playerLocation = location;
-	setTileType(*playerLocation, crs::PLAYER);
 }
 
 crs::Location *Game::randomFruitLocation() {
@@ -73,6 +63,8 @@ bool Game::bfs() {
 	/*
 	 * ALGORITHM
 	 */
+
+	crs::Location* playerLocation = clientPlayer->getLocation();
 
 	visited[playerLocation->getX()][playerLocation->getY()] = true;
 	map[playerLocation->getX()][playerLocation->getY()].setType(crs::VISITED);
@@ -134,6 +126,8 @@ bool Game::bfs() {
 }
 
 Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
+	crs::currentGame = this;
+
 	gameOver = false;
 	direction = crs::STOP;
 	moving = crs::STOP;
@@ -155,7 +149,8 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 	view.zoom(zoom);
 	window->setView(view);
 
-	setPlayerInMap(new crs::Location(width / 2, height / 2));
+	clientPlayer = new Player(new crs::Location(width / 2, height / 2), sf::Color::Cyan);
+	players.push_back(clientPlayer);
 
 	fruitLocation = randomFruitLocation();
 	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::FRUIT);
@@ -177,13 +172,13 @@ void Game::draw(float alpha) {
 
 	for (auto & loopX : map) {
 		for (auto & loopY : loopX) {
-			loopY.draw(window, alpha, moving);
+			loopY.draw(window);
 		}
-
-		//cout << " " << explanation[i] << endl;
 	}
 
-	//cout << "Score: " << score << endl;
+	for (auto & player : players) {
+		player->draw(window, alpha, moving);
+	}
 
 	sf::View view = sf::View();
 
@@ -228,8 +223,8 @@ void Game::input() {
 
 				gameOver = !quitEvent->isCancelled();
 			} else if (event.key.code == sf::Keyboard::B) {
-				Logger::info("Player: " + std::to_string(playerLocation->getX()) + " " + std::to_string(playerLocation->getY()));
-				Logger::info("Fruit: " + std::to_string(fruitLocation->getX()) + " " + std::to_string(fruitLocation->getY()));
+				std::cout << Logger::info << "Player: " << clientPlayer->getLocation()->getX() << " " << clientPlayer->getLocation()->getY() << std::endl;
+				std::cout << Logger::info << "Fruit: " << fruitLocation->getX() << " " << fruitLocation->getY() << std::endl;
 			} else if (event.key.code == sf::Keyboard::U) {
 				setZoom(zoom + 0.1f);
 			}
@@ -250,7 +245,7 @@ void Game::logic() {
 
 	movePlayer(direction);
 
-	if (playerLocation->getX() == fruitLocation->getX() && playerLocation->getY() == fruitLocation->getY()) {
+	if (clientPlayer->getLocation()->getX() == fruitLocation->getX() && clientPlayer->getLocation()->getY() == fruitLocation->getY()) {
 		score++;
 		setZoom(zoom + 0.1f);
 		crs::Location* newFruitLoc = randomFruitLocation();
@@ -284,15 +279,16 @@ void Game::setZoom(float newZoom) {
 
 Game::~Game() {
 	delete fruitLocation;
-	delete playerLocation;
+	delete clientPlayer;
 }
 
 void Game::setFruitLocation(crs::Location *location) {
+	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::AIR);
 	delete fruitLocation;
 	fruitLocation = location;
 	if (map[fruitLocation->getX()][fruitLocation->getY()].getType() != crs::AIR) {
 		fruitLocation = randomFruitLocation();
-		Logger::warn("Cross placed on not-air tile by plugin. Location changed.");
+		std::cerr << Logger::warning << "Cross placed on not-air tile by plugin. Location changed." << std::endl;
 	}
 	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::FRUIT);
 }
@@ -303,8 +299,8 @@ bool Game::movePlayer(crs::Direction moveDirection) {
 	int fruitX = fruitLocation->getX();
 	int fruitY = fruitLocation->getY();
 
-	int x = playerLocation->getX();
-	int y = playerLocation->getY();
+	int x = clientPlayer->getLocation()->getX();
+	int y = clientPlayer->getLocation()->getY();
 
 	if (moveDirection == crs::AUTO) {
 		bfs();
@@ -336,7 +332,7 @@ bool Game::movePlayer(crs::Direction moveDirection) {
 		}
 	}
 
-	auto* newLocation = new crs::Location(0, 0);
+	auto* newLocation = new crs::Location(clientPlayer->getLocation()->getX(), clientPlayer->getLocation()->getY());
 
 	switch (moveDirection) {
 		case crs::UP:
@@ -401,7 +397,7 @@ bool Game::movePlayer(crs::Direction moveDirection) {
 
 	if (moveEvent->isCancelled()) return false;
 
-	setPlayerInMap(moveEvent->getNewLocation());
+	clientPlayer->setLocation(moveEvent->getNewLocation());
 
 	return true;
 }

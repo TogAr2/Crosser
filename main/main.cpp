@@ -2,12 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "game.hpp"
+#include "../game/game.hpp"
 #include "config.hpp"
 
 #include <chrono>
-
-#include "pluginManager.hpp"
 
 using namespace std;
 using namespace std::chrono_literals;
@@ -15,12 +13,12 @@ using namespace std::chrono_literals;
 constexpr std::chrono::nanoseconds timestep(50ms);
 
 int main() {
-	PluginManager::instance.start();
-
     sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(120);
 
   	Game game(&window);
+	PluginManager::instance.start();
+
   	game.draw(0);
 
   	using clock = std::chrono::high_resolution_clock;

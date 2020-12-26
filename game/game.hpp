@@ -9,31 +9,9 @@
 #include "tile.hpp"
 #include "api-utils.hpp"
 #include "IGame.hpp"
+#include "../multiplayer/player.hpp"
 
-#include "pluginManager.hpp"
-
-const std::string explanation[height] = {
-		"",
-		"Welcome to Crosser v" + (std::string) CROSSER_VERSION,
-		"",
-		"Use WASD to movePlayer.",
-		"",
-		"Search for the cross.",
-		"",
-		"Press M if you are a lazy",
-		"person :/",
-		"",
-		"Good luck!",
-		"",
-		"",
-		"",
-		"Press Q to quit.",
-		"",
-		"",
-		"",
-		"",
-		""
-};
+#include "../plugins/pluginManager.hpp"
 
 class Game : public crs::IGame {
 	std::mt19937 random;
@@ -42,12 +20,14 @@ public:
 	crs::Direction direction;
 	crs::Direction moving;
 
+	std::vector<Player*> players;
+
 private:
 	Tile map[width][height];
 
 	bool gameOver;
 	crs::Location* fruitLocation = nullptr;
-	crs::Location* playerLocation = nullptr;
+	Player* clientPlayer;
 	int score;
 	float zoom = 0.1;
 	float previousZoom = 0.1;
@@ -59,7 +39,6 @@ private:
 
 	void addRandomObstacle();
 	bool isObstacle(int locX, int locY);
-	void setPlayerInMap(crs::Location* location);
 	crs::Location *randomFruitLocation();
 
 	int moveCount = 0;
