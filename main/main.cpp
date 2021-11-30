@@ -1,9 +1,9 @@
-#include <iostream>
-
 #include <SFML/Graphics.hpp>
 
 #include "../game/game.hpp"
 #include "config.hpp"
+#include "logger.hpp"
+#include "../multiplayer/network.hpp"
 
 #include <chrono>
 
@@ -12,7 +12,13 @@ using namespace std::chrono_literals;
 
 constexpr std::chrono::nanoseconds timestep(50ms);
 
-int main() {
+int main(int argc, char* argv[]) {
+	if (argc > 2) {
+		//Parse arguments
+		Network::ip = argv[1];
+		Network::port = std::stoi(argv[2]);
+	}
+
     sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(120);
 

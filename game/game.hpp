@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <random>
-#include <list>
+#include <unordered_map>
+#include <queue>
 
 #include "config.hpp"
 #include "tile.hpp"
@@ -14,20 +15,26 @@
 #include "../plugins/pluginManager.hpp"
 
 class Game : public crs::IGame {
-	std::mt19937 random;
+	static Game* instance;
+
+	int lastId = -1;
 
 public:
+	std::mt19937 random;
+
 	crs::Direction direction;
-	crs::Direction moving;
+	std::unordered_map<int, crs::Direction> playersMoving;
+	std::queue<std::pair<Player*, crs::Direction>*> moveRequests;
 
-	std::vector<Player*> players;
+	std::unordered_map<int, Player*> players;
 
-private:
+	Player* clientPlayer;
+
 	Tile map[width][height];
 
+private:
 	bool gameOver;
 	crs::Location* fruitLocation = nullptr;
-	Player* clientPlayer;
 	int score;
 	float zoom = 0.1;
 	float previousZoom = 0.1;
@@ -58,10 +65,18 @@ public:
 
 	void setZoom(float zoom);
 	void setFruitLocation(crs::Location *location);
-	bool movePlayer(crs::Direction moveDirection);
+	bool controlPlayer(crs::Direction moveDirection);
+	void requestMove(Player* player, crs::Direction moveDirection);
+	void movePlayer(Player* player, crs::Direction moveDirection);
 
 	void setTileType(const crs::Location& location, crs::TileType type);
 	crs::TileType getTileType(const crs::Location& location);
+
+	static Game* get();
+
+	crs::Location *getFruitLocation() const;
+
+	Player* newPlayer(crs::Location *location, const sf::Color &color, sf::TcpSocket* socket = nullptr);
 };
 
 #endif //CROSSER_GAME_HPP
