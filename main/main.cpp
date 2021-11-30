@@ -32,7 +32,16 @@ int main(int argc, char* argv[]) {
   	std::chrono::nanoseconds lag(0ns);
   	auto time_start = clock::now();
 
+	int countedFrames = 0;
+	sf::Clock sfClock;
   	while (window.isOpen()) {
+		countedFrames++;
+		if (sfClock.getElapsedTime().asMilliseconds() >= 1000) {
+			game.setFps(countedFrames);
+			sfClock.restart();
+			countedFrames = 0;
+		}
+
   		auto delta_time = clock::now() - time_start;
   		time_start = clock::now();
   		lag += std::chrono::duration_cast<std::chrono::nanoseconds>(delta_time);

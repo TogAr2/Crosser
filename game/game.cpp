@@ -500,6 +500,10 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	}
 }
 
+void Game::setFps(int fps) {
+	hud->setFps(fps);
+}
+
 void Game::setTileType(const crs::Location& location, crs::TileType type) {
 	map[location.getX()][location.getY()].setType(type);
 }

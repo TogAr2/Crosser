@@ -73,6 +73,8 @@ public:
 	void requestMove(Player* player, crs::Direction moveDirection);
 	void movePlayer(Player* player, crs::Direction moveDirection);
 
+	void setFps(int fps);
+
 	void setTileType(const crs::Location& location, crs::TileType type);
 	crs::TileType getTileType(const crs::Location& location);
 
