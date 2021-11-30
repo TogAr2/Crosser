@@ -11,8 +11,11 @@
 #include "api-utils.hpp"
 #include "IGame.hpp"
 #include "../multiplayer/player.hpp"
+#include "hud.hpp"
 
 #include "../plugins/pluginManager.hpp"
+
+class Hud;
 
 class Game : public crs::IGame {
 	static Game* instance;
@@ -42,7 +45,8 @@ private:
 	int maxWaitBeforeZoom = 3;
 
 	sf::RenderWindow* window;
-	sf::Font mainFont;
+	sf::Font* mainFont;
+	Hud* hud = nullptr;
 
 	void addRandomObstacle();
 	bool isObstacle(int locX, int locY);
@@ -61,7 +65,7 @@ public:
 
 	[[nodiscard]] bool isGameOver() const;
 	[[nodiscard]] int getScore() const;
-	[[nodiscard]] sf::Font getMainFont() const;
+	[[nodiscard]] sf::Font* getMainFont();
 
 	void setZoom(float zoom);
 	void setFruitLocation(crs::Location *location);

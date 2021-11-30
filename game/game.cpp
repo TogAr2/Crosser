@@ -163,16 +163,37 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 		addRandomObstacle();
 	}
 
-	sf::Font font;
-	if (!font.loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
-		std::cout << "Error: Could not load font!" << std::endl;
+	mainFont = new sf::Font();
+	if (!mainFont->loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
+		std::cout << Logger::error << " Could not load font!" << std::endl;
 	}
 
-	mainFont = font;
+	hud = new Hud(this);
 }
 
 void Game::draw(float alpha) {
 	window->clear(sf::Color::Black);
+
+	sf::View view = sf::View();
+
+	view.setCenter((float) width / 2, (float) height / 2);
+	view.reset(sf::FloatRect(0, 0, (float) window->getSize().x, (float) window->getSize().y));
+
+	if (!gameOver) {
+		//Interpolate zoom
+		float framesPassed;
+		if (waitBeforeZoom != 0) {
+			framesPassed = (float) (maxWaitBeforeZoom - waitBeforeZoom) + alpha;
+		} else {
+			framesPassed = (float) maxWaitBeforeZoom;
+		}
+		float newZoom = zoom + ((zoom - previousZoom) * framesPassed / (float) maxWaitBeforeZoom) - (zoom - previousZoom);
+		view.zoom(newZoom);
+	} else {
+		view.zoom(zoom);
+	}
+
+	window->setView(view);
 
 	for (auto & loopX : map) {
 		for (auto & loopY : loopX) {
@@ -184,22 +205,7 @@ void Game::draw(float alpha) {
 		pair.second->draw(window, alpha);
 	}
 
-	sf::View view = sf::View();
-
-	view.setCenter((float) width / 2, (float) height / 2);
-	view.reset(sf::FloatRect(0, 0, window->getSize().x, window->getSize().y));
-
-	//Interpolate zoom
-	float framesPassed;
-	if (waitBeforeZoom != 0) {
-		framesPassed = (float) (maxWaitBeforeZoom - waitBeforeZoom) + alpha;
-	} else {
-		framesPassed = (float) maxWaitBeforeZoom;
-	}
-	float newZoom = zoom + ((zoom - previousZoom) * framesPassed / (float) maxWaitBeforeZoom) - (zoom - previousZoom);
-	view.zoom(newZoom);
-
-	window->setView(view);
+	hud->draw(window);
 
 	window->display();
 }
@@ -221,17 +227,19 @@ void Game::input() {
 			} else if (event.key.code == sf::Keyboard::M) {
 				direction = crs::AUTO;
 			} else if (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::Escape) {
-				crs::Event *crsEvent = new crs::QuitEvent();
-				auto *quitEvent = (crs::QuitEvent *) crsEvent;
-				PluginManager::instance.broadcastEvent(crsEvent);
+				if (!gameOver) {
+					crs::Event *crsEvent = new crs::QuitEvent();
+					auto *quitEvent = (crs::QuitEvent *) crsEvent;
+					PluginManager::instance.broadcastEvent(crsEvent);
 
-				gameOver = !quitEvent->isCancelled();
+					gameOver = !quitEvent->isCancelled();
 
-				if (gameOver && Network::client) {
-					Network::disconnect();
-				}
-				if (gameOver && Network::serverUp) {
-					Network::serverUp = false;
+					if (gameOver && Network::client) {
+						Network::disconnect();
+					}
+					if (gameOver && Network::serverUp) {
+						Network::serverUp = false;
+					}
 				}
 
 				if (event.key.code == sf::Keyboard::Escape) {
@@ -256,6 +264,8 @@ void Game::input() {
 }
 
 void Game::logic() {
+	if (gameOver) return;
+
 	if (waitBeforeZoom == 0) {
 		previousZoom = zoom;
 	} else {
@@ -304,7 +314,7 @@ void Game::logic() {
 	return score;
 }
 
-[[nodiscard]] sf::Font Game::getMainFont() const {
+[[nodiscard]] sf::Font* Game::getMainFont() {
 	return mainFont;
 }
 
@@ -318,6 +328,8 @@ void Game::setZoom(float newZoom) {
 
 Game::~Game() {
 	delete fruitLocation;
+	delete mainFont;
+	delete hud;
 
 	for (auto & pair : players) {
 		delete pair.second;

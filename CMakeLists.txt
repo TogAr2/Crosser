@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Crosser VERSION 2.0)
+project(Crosser VERSION 2.1)
 
 include(GNUInstallDirs)
 
@@ -14,7 +14,7 @@ find_package(SFML COMPONENTS system window graphics network audio REQUIRED)
 find_package(CrosserAPI REQUIRED)
 
 configure_file(main/config.hpp.in config.hpp)
-add_executable(Crosser main/main.cpp game/game.cpp game/tile.cpp game/tile.hpp plugins/pluginManager.cpp plugins/pluginManager.hpp multiplayer/network.cpp multiplayer/network.hpp multiplayer/player.cpp multiplayer/player.hpp)
+add_executable(Crosser main/main.cpp game/game.cpp game/tile.cpp game/tile.hpp plugins/pluginManager.cpp plugins/pluginManager.hpp multiplayer/network.cpp multiplayer/network.hpp multiplayer/player.cpp multiplayer/player.hpp game/hud.hpp game/hud.cpp)
 
 target_link_libraries(Crosser PUBLIC CrosserAPI sfml-graphics sfml-window sfml-system sfml-network)
 
