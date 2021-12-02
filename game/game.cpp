@@ -172,12 +172,21 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 }
 
 void Game::draw(float alpha) {
-	window->clear(sf::Color::Black);
+	window->clear(sf::Color(184, 115, 51));
 
-	sf::View view = sf::View();
-
-	view.setCenter((float) width / 2, (float) height / 2);
-	view.reset(sf::FloatRect(0, 0, (float) window->getSize().x, (float) window->getSize().y));
+	unsigned int windowWidth = window->getSize().x;
+	unsigned int windowHeight = window->getSize().y;
+	float mapSize = width * blockSize;
+	float viewWidth;
+	float viewHeight;
+	if (windowWidth > windowHeight) {
+		viewWidth = (float) windowWidth / (float) windowHeight * mapSize;
+		viewHeight = mapSize;
+	} else {
+		viewWidth = mapSize;
+		viewHeight = (float) windowHeight / (float) windowWidth * mapSize;
+	}
+	sf::View view = sf::View(sf::Vector2f(mapSize / 2, mapSize / 2), sf::Vector2f(viewWidth, viewHeight));
 
 	if (!gameOver) {
 		//Interpolate zoom
@@ -194,6 +203,10 @@ void Game::draw(float alpha) {
 	}
 
 	window->setView(view);
+
+	sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(mapSize, mapSize));
+	shape.setFillColor(sf::Color::Black);
+	window->draw(shape);
 
 	for (auto & loopX : map) {
 		for (auto & loopY : loopX) {
