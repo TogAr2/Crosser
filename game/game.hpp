@@ -26,7 +26,6 @@ public:
 	std::mt19937 random;
 
 	crs::Direction direction;
-	int moveCooldown;
 	std::unordered_map<int, crs::Direction> playersMoving;
 	std::queue<std::pair<Player*, crs::Direction>*> moveRequests;
 
@@ -39,7 +38,6 @@ public:
 private:
 	bool gameOver;
 	crs::Location* fruitLocation = nullptr;
-	int score;
 	float zoom = 0.1;
 	float previousZoom = 0.1;
 	int waitBeforeZoom = 0;
@@ -66,7 +64,6 @@ public:
 	void logic();
 
 	[[nodiscard]] bool isGameOver() const;
-	[[nodiscard]] int getScore() const;
 	[[nodiscard]] sf::Font* getMainFont();
 
 	void setZoom(float zoom);

@@ -132,8 +132,6 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 
 	gameOver = false;
 	direction = crs::STOP;
-	moveCooldown = 0;
-	score = 0;
 	this->window = window;
 
 	random.seed(time(nullptr) * 5);
@@ -302,10 +300,6 @@ void Game::logic() {
 
 [[nodiscard]] bool Game::isGameOver() const {
 	return gameOver;
-}
-
-[[nodiscard]] int Game::getScore() const {
-	return score;
 }
 
 [[nodiscard]] sf::Font* Game::getMainFont() {
@@ -520,7 +514,11 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	player->setLastMoveTime(0);
 
 	if (!Network::client && player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
-		score++;
+		if (player->isRemote()) {
+			((RemotePlayer*) player)->setScore(player->getScore() + 1);
+		} else {
+			player->setScore(player->getScore() + 1);
+		}
 		setZoom(zoom + 0.1f);
 		crs::Location* newFruitLoc = randomFruitLocation();
 

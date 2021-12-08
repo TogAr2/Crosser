@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
 
     sf::RenderWindow window(sf::VideoMode(width * blockSize * 2, height * blockSize * 2), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
     window.setFramerateLimit(120);
+	window.setVerticalSyncEnabled(true);
 
   	Game game(&window);
 	PluginManager::instance.start();

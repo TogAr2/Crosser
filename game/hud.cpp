@@ -21,7 +21,7 @@ void Hud::draw() {
 	window->draw(fpsText);
 
 	if (game->isGameOver()) {
-		gameOverText.setString("Your score was: " + std::to_string(game->getScore()));
+		gameOverText.setString("Your score was: " + std::to_string(game->clientPlayer->getScore()));
 		window->draw(gameOverText);
 	}
 }

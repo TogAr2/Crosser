@@ -20,6 +20,7 @@ class Player {
 	crs::Location* location{};
 
 	int lastMoveTime;
+	int score;
 
 public:
 	Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote = false);
@@ -39,11 +40,13 @@ public:
 	void setId(int id);
 
 	[[nodiscard]] bool isRemote() const;
-
 	[[nodiscard]] RemotePlayer *getRemote() const;
 
 	int getLastMoveTime() const;
 	void setLastMoveTime(int lastMoveTime);
+
+	int getScore() const;
+	void setScore(int score);
 };
 
 class RemotePlayer : public Player {
@@ -54,6 +57,8 @@ public:
 	~RemotePlayer();
 
 	[[nodiscard]] sf::TcpSocket *getSocket() const;
+
+	void setScore(int score);
 };
 
 #endif //CROSSER_PLAYER_HPP

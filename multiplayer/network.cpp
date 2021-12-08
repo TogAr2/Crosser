@@ -232,6 +232,11 @@ void Network::receive() {
 			crs::TileType tileType = crs::tileTypeValueof(tileString);
 
 			game->map[x][y].setType(tileType);
+		} else if (packetNumber == PacketNumber::SCORE_UPDATE) {
+			int score;
+			received >> score;
+
+			game->clientPlayer->setScore(score);
 		}
 	}
 }
@@ -264,4 +269,18 @@ void Network::sendTileUpdate(const crs::Location& location, const crs::TileType&
 	packet << crs::to_string(type);
 
 	sendPacketToAll(packet, game->clientPlayer->getId());
+}
+
+void Network::sendScoreUpdate(sf::TcpSocket *socket, int score) {
+	Game* game = Game::get();
+
+	sf::Packet packet;
+	packet << PacketNumber::SCORE_UPDATE;
+	packet << -1;
+
+	packet << score;
+
+	if (socket->send(packet) != sf::Socket::Done) {
+		std::cout << Logger::error << "Error sending score update packet!" << std::endl;
+	}
 }

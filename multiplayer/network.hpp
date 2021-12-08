@@ -12,6 +12,7 @@ public:
 	static const int INITIAL_INFO = 2;
 	static const int MOVE = 3;
 	static const int TILE_UPDATE = 4;
+	static const int SCORE_UPDATE = 5;
 };
 
 class Network {
@@ -34,6 +35,7 @@ public:
 
 	static void sendMove(crs::Direction direction);
 	static void sendTileUpdate(const crs::Location& location, const crs::TileType& type);
+	static void sendScoreUpdate(sf::TcpSocket* socket, int score);
 };
 
 

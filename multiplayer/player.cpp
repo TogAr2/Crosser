@@ -1,10 +1,11 @@
 #include <logger.hpp>
 #include "player.hpp"
 #include "../game/game.hpp"
+#include "network.hpp"
 
 std::shared_ptr<sf::Texture> Player::texture = std::shared_ptr<sf::Texture>();
 
-Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote), lastMoveTime(0) {
+Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote), lastMoveTime(0), score(0) {
 	if (texture == nullptr) {
 		texture = std::shared_ptr<sf::Texture>(new sf::Texture());
 		if (!texture->loadFromFile("resources/image.png")) {
@@ -31,7 +32,7 @@ Player::~Player() {
 	delete Player::location;
 }
 
-Player::Player(const Player &player): location(player.location), color(player.color), id(player.id), remote(player.remote), lastMoveTime(player.lastMoveTime) {};
+Player::Player(const Player &player): location(player.location), color(player.color), id(player.id), remote(player.remote), lastMoveTime(player.lastMoveTime), score(player.score) {};
 
 void Player::update() {
 	lastMoveTime++;
@@ -96,6 +97,14 @@ void Player::setLastMoveTime(int lastMoveTime) {
 	Player::lastMoveTime = lastMoveTime;
 }
 
+int Player::getScore() const {
+	return score;
+}
+
+void Player::setScore(int score) {
+	Player::score = score;
+}
+
 RemotePlayer::RemotePlayer(crs::Location *location, const sf::Color &color, const int &id, sf::TcpSocket* socket) : Player(location, color, id, true), socket(socket) {}
 
 RemotePlayer::~RemotePlayer() {
@@ -104,4 +113,9 @@ RemotePlayer::~RemotePlayer() {
 
 sf::TcpSocket *RemotePlayer::getSocket() const {
 	return socket;
+}
+
+void RemotePlayer::setScore(int score) {
+	Player::setScore(score);
+	Network::sendScoreUpdate(socket, score);
 }
