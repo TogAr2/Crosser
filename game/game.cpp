@@ -279,6 +279,13 @@ void Game::logic() {
 		waitBeforeZoom--;
 	}
 
+	for (auto &pair : players) {
+		pair.second->update();
+		if (pair.second->getLastMoveTime() >= 2) {
+			playersMoving[pair.first] = crs::STOP;
+		}
+	}
+
 	if (Network::client) {
 		Network::receive();
 	} else {
@@ -287,13 +294,6 @@ void Game::logic() {
 			movePlayer(pair->first, pair->second);
 			moveRequests.pop();
 			delete pair;
-		}
-	}
-
-	for (auto &pair : players) {
-		pair.second->update();
-		if (pair.second->getLastMoveTime() >= 2) {
-			playersMoving[pair.first] = crs::STOP;
 		}
 	}
 

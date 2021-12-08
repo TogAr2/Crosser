@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Crosser VERSION 2.2)
+project(Crosser VERSION 2.3)
 
 include(GNUInstallDirs)
 
