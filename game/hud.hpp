@@ -6,6 +6,7 @@
 
 class Hud {
 	Game* game;
+	sf::RenderWindow* window;
 	sf::View view;
 	sf::Text gameOverText;
 	sf::Text fpsText;
@@ -13,8 +14,10 @@ class Hud {
 public:
 	explicit Hud(Game* game);
 
-	void draw(sf::RenderWindow* window);
+	void draw();
 	void setFps(int fps);
+
+	void adjustSize(unsigned int windowWidth, unsigned int windowHeight);
 };
 
 #endif //CROSSER_HUD_HPP

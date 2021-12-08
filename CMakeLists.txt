@@ -15,6 +15,7 @@ find_package(CrosserAPI REQUIRED)
 
 configure_file(main/config.hpp.in config.hpp)
 add_executable(Crosser main/main.cpp game/game.cpp game/tile.cpp game/tile.hpp plugins/pluginManager.cpp plugins/pluginManager.hpp multiplayer/network.cpp multiplayer/network.hpp multiplayer/player.cpp multiplayer/player.hpp game/hud.hpp game/hud.cpp)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources)
 
 target_link_libraries(Crosser PUBLIC CrosserAPI sfml-graphics sfml-window sfml-system sfml-network)
 

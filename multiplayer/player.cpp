@@ -2,7 +2,17 @@
 #include "player.hpp"
 #include "../game/game.hpp"
 
-Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote) {}
+std::shared_ptr<sf::Texture> Player::texture = std::shared_ptr<sf::Texture>();
+
+Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote) {
+	if (texture == nullptr) {
+		texture = std::shared_ptr<sf::Texture>(new sf::Texture());
+		if (!texture->loadFromFile("resources/image.png")) {
+			std::cout << Logger::error << "Failed to load texture" << std::endl;
+		}
+		texture->setSmooth(false);
+	}
+}
 
 const sf::Color &Player::getColor() const {
 	return color;
@@ -13,6 +23,7 @@ crs::Location* &Player::getLocation() {
 }
 
 void Player::setLocation(crs::Location *location) {
+	delete Player::location;
 	Player::location = location;
 }
 
@@ -25,6 +36,8 @@ Player::Player(const Player &player): location(player.location), color(player.co
 void Player::draw(sf::RenderWindow *window, const float &alpha) {
 	Game* game = Game::get();
 
+	//sf::Sprite shape(*texture);
+	//shape.setScale(40, 40);
 	sf::RectangleShape shape(sf::Vector2f(blockSize, blockSize));
 	shape.setPosition((float) location->getX() * blockSize, (float) location->getY() * blockSize);
 
@@ -68,6 +81,10 @@ void Player::setColor(const sf::Color &color) {
 }
 
 RemotePlayer::RemotePlayer(crs::Location *location, const sf::Color &color, const int &id, sf::TcpSocket* socket) : Player(location, color, id, true), socket(socket) {}
+
+RemotePlayer::~RemotePlayer() {
+	delete socket;
+}
 
 sf::TcpSocket *RemotePlayer::getSocket() const {
 	return socket;

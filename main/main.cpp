@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 		Network::port = std::stoi(argv[2]);
 	}
 
-    sf::RenderWindow window(sf::VideoMode(width * blockSize, height * blockSize), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+    sf::RenderWindow window(sf::VideoMode(width * blockSize * 2, height * blockSize * 2), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
     window.setFramerateLimit(120);
 
   	Game game(&window);

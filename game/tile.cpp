@@ -55,6 +55,7 @@ PathfinderTile* PathfinderTile::getPrevious() const {
 }
 
 void PathfinderTile::setPrevious(PathfinderTile* previous) {
+	delete PathfinderTile::previous;
 	PathfinderTile::previous = previous;
 }
 

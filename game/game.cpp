@@ -26,8 +26,8 @@ bool Game::isObstacle(int locX, int locY) {
 }
 
 crs::Location *Game::randomFruitLocation() {
-	sf::Vector2<float> viewSize = window->getView().getSize();
-	sf::Vector2<float> viewOrigin = sf::Vector2<float>(window->getView().getCenter().x - (viewSize.x / 2), window->getView().getCenter().y - (viewSize.y / 2));
+	sf::Vector2<float> viewSize = view->getSize();
+	sf::Vector2<float> viewOrigin = sf::Vector2<float>(view->getCenter().x - (viewSize.x / 2), view->getCenter().y - (viewSize.y / 2));
 
 	std::uniform_int_distribution<int> widthDistribution(viewOrigin.x, viewOrigin.x + viewSize.x - 1);
 	std::uniform_int_distribution<int> heightDistribution(viewOrigin.y, viewOrigin.y + viewSize.y - 1);
@@ -123,8 +123,6 @@ bool Game::bfs() {
 
 	std::cout << current->getX() << " " << current->getY() << std::endl;
 
-	draw(0);
-
 	return reachedFinish;
 }
 
@@ -146,11 +144,16 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 		}
 	}
 
-	sf::View view = sf::View();
-	view.setCenter((float) width / 2, (float) height / 2);
-	view.reset(sf::FloatRect(0, 0, window->getSize().x, window->getSize().y));
-	view.zoom(zoom);
-	window->setView(view);
+	mainFont = new sf::Font();
+	if (!mainFont->loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
+		std::cout << Logger::error << " Could not load font!" << std::endl;
+	}
+
+	hud = new Hud(this);
+
+	view = new sf::View();
+	view->setCenter(mapSize / 2, mapSize / 2);
+	adjustSize(window->getSize().x, window->getSize().y);
 
 	clientPlayer = newPlayer(new crs::Location(width / 2, height / 2), sf::Color::Cyan);
 	players[clientPlayer->getId()] = clientPlayer;
@@ -162,33 +165,12 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 	for (int i = 0; i < 30; i++) {
 		addRandomObstacle();
 	}
-
-	mainFont = new sf::Font();
-	if (!mainFont->loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
-		std::cout << Logger::error << " Could not load font!" << std::endl;
-	}
-
-	hud = new Hud(this);
 }
 
 void Game::draw(float alpha) {
 	window->clear(sf::Color(184, 115, 51));
 
-	unsigned int windowWidth = window->getSize().x;
-	unsigned int windowHeight = window->getSize().y;
-	float mapSize = width * blockSize;
-	float viewWidth;
-	float viewHeight;
-	if (windowWidth > windowHeight) {
-		viewWidth = (float) windowWidth / (float) windowHeight * mapSize;
-		viewHeight = mapSize;
-	} else {
-		viewWidth = mapSize;
-		viewHeight = (float) windowHeight / (float) windowWidth * mapSize;
-	}
-	sf::View view = sf::View(sf::Vector2f(mapSize / 2, mapSize / 2), sf::Vector2f(viewWidth, viewHeight));
-
-	if (!gameOver) {
+	if (!gameOver && zoom != previousZoom) {
 		//Interpolate zoom
 		float framesPassed;
 		if (waitBeforeZoom != 0) {
@@ -197,12 +179,11 @@ void Game::draw(float alpha) {
 			framesPassed = (float) maxWaitBeforeZoom;
 		}
 		float newZoom = zoom + ((zoom - previousZoom) * framesPassed / (float) maxWaitBeforeZoom) - (zoom - previousZoom);
-		view.zoom(newZoom);
-	} else {
-		view.zoom(zoom);
+		adjustSize(window->getSize().x, window->getSize().y);
+		//view->zoom(newZoom);
 	}
 
-	window->setView(view);
+	window->setView(*view);
 
 	sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(mapSize, mapSize));
 	shape.setFillColor(sf::Color::Black);
@@ -218,7 +199,7 @@ void Game::draw(float alpha) {
 		pair.second->draw(window, alpha);
 	}
 
-	hud->draw(window);
+	hud->draw();
 
 	window->display();
 }
@@ -272,6 +253,8 @@ void Game::input() {
 			}
 		} else if (event.type == sf::Event::Closed) {
 			window->close();
+		} else if (event.type == sf::Event::Resized) {
+			adjustSize(event.size.width, event.size.height);
 		}
 	}
 }
@@ -301,22 +284,6 @@ void Game::logic() {
 	}
 
 	controlPlayer(direction);
-
-	if (Network::client) return;
-
-	for (auto &pair : players) {
-		Player* player = pair.second;
-		if (player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
-			score++;
-			setZoom(zoom + 0.1f);
-			crs::Location* newFruitLoc = randomFruitLocation();
-
-			crs::Event *event = new crs::CrossFoundEvent(crs::Location(fruitLocation->getX(), fruitLocation->getY()), newFruitLoc);
-			PluginManager::instance.broadcastEvent(event);
-
-			setFruitLocation(((crs::CrossFoundEvent *) event)->getNewCrossLocation());
-		}
-	}
 }
 
 [[nodiscard]] bool Game::isGameOver() const {
@@ -343,6 +310,7 @@ Game::~Game() {
 	delete fruitLocation;
 	delete mainFont;
 	delete hud;
+	delete view;
 
 	for (auto & pair : players) {
 		delete pair.second;
@@ -367,12 +335,8 @@ void Game::setFruitLocation(crs::Location *location) {
 	if (send) Network::sendTileUpdate(*fruitLocation, crs::FRUIT);
 }
 
-crs::Location *Game::getFruitLocation() const {
-	return fruitLocation;
-}
-
-bool Game::controlPlayer(crs::Direction moveDirection) {
-	if (direction == crs::STOP) return false;
+void Game::controlPlayer(crs::Direction moveDirection) {
+	if (direction == crs::STOP) return;
 
 	int fruitX = fruitLocation->getX();
 	int fruitY = fruitLocation->getY();
@@ -410,77 +374,59 @@ bool Game::controlPlayer(crs::Direction moveDirection) {
 		}
 	}
 
-	auto* newLocation = new crs::Location(clientPlayer->getLocation()->getX(), clientPlayer->getLocation()->getY());
-
 	switch (moveDirection) {
 		case crs::UP:
 			if (y > 0) {
 				if (!isObstacle(x, y - 1)) {
 					playersMoving[clientPlayer->getId()] = crs::UP;
-					newLocation = new crs::Location(x, y - 1);
 				} else {
 					playersMoving[clientPlayer->getId()] = crs::STOP;
 				}
 			} else {
 				playersMoving[clientPlayer->getId()] = crs::UP;
-				newLocation = new crs::Location(x, height - 1);
 			}
 			break;
 		case crs::LEFT:
 			if (x > 0) {
 				if (!isObstacle(x - 1, y)) {
 					playersMoving[clientPlayer->getId()] = crs::LEFT;
-					newLocation = new crs::Location(x - 1, y);
 				} else {
 					playersMoving[clientPlayer->getId()] = crs::STOP;
 				}
 			} else {
 				playersMoving[clientPlayer->getId()] = crs::LEFT;
-				newLocation = new crs::Location(width - 1, y);
 			}
 			break;
 		case crs::DOWN:
 			if (y < height - 1) {
 				if (!isObstacle(x, y + 1)) {
 					playersMoving[clientPlayer->getId()] = crs::DOWN;
-					newLocation = new crs::Location(x, y + 1);
 				} else {
 					playersMoving[clientPlayer->getId()] = crs::STOP;
 				}
 			} else {
 				playersMoving[clientPlayer->getId()] = crs::DOWN;
-				newLocation = new crs::Location(x, 0);
 			}
 			break;
 		case crs::RIGHT:
 			if (x < width - 1) {
 				if (!isObstacle(x + 1, y)) {
 					playersMoving[clientPlayer->getId()] = crs::RIGHT;
-					newLocation = new crs::Location(x + 1, y);
 				} else {
 					playersMoving[clientPlayer->getId()] = crs::STOP;
 				}
 			} else {
 				playersMoving[clientPlayer->getId()] = crs::RIGHT;
-				newLocation = new crs::Location(0, y);
 			}
 			break;
 		default:
 			break;
 	}
 
-	crs::Event* event = new crs::MoveEvent(moveDirection, newLocation);
-	auto* moveEvent = (crs::MoveEvent*) event;
-	PluginManager::instance.broadcastEvent(event);
-
-	if (moveEvent->isCancelled()) return false;
-
-	clientPlayer->setLocation(moveEvent->getNewLocation());
+	movePlayer(clientPlayer, playersMoving[clientPlayer->getId()]);
 	if (Network::client || Network::serverUp) {
 		Network::sendMove(playersMoving[clientPlayer->getId()]);
 	}
-
-	return true;
 }
 
 void Game::requestMove(Player* player, crs::Direction moveDirection) {
@@ -494,27 +440,98 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	int x = player->getLocation()->getX();
 	int y = player->getLocation()->getY();
 
-	playersMoving[player->getId()] = moveDirection;
+	crs::Location* newLocation = nullptr;
+
 	switch (moveDirection) {
 		case crs::UP:
-			player->setLocation(new crs::Location(x, y - 1));
+			if (y > 0) {
+				if (!isObstacle(x, y - 1)) {
+					newLocation = new crs::Location(x, y - 1);
+				}
+			} else {
+				newLocation = new crs::Location(x, height - 1);
+			}
 			break;
 		case crs::LEFT:
-			player->setLocation(new crs::Location(x - 1, y));
+			if (x > 0) {
+				if (!isObstacle(x - 1, y)) {
+					newLocation = new crs::Location(x - 1, y);
+				}
+			} else {
+				newLocation = new crs::Location(width - 1, y);
+			}
 			break;
 		case crs::DOWN:
-			player->setLocation(new crs::Location(x, y + 1));
+			if (y < height - 1) {
+				if (!isObstacle(x, y + 1)) {
+					newLocation = new crs::Location(x, y + 1);
+				}
+			} else {
+				newLocation = new crs::Location(x, 0);
+			}
 			break;
 		case crs::RIGHT:
-			player->setLocation(new crs::Location(x + 1, y));
+			if (x < width - 1) {
+				if (!isObstacle(x + 1, y)) {
+					newLocation = new crs::Location(x + 1, y);
+				}
+			} else {
+				newLocation = new crs::Location(0, y);
+			}
 			break;
 		default:
 			break;
+	}
+
+	if (newLocation == nullptr) {
+		newLocation = new crs::Location(x, y);
+	}
+
+	crs::Event* event = new crs::MoveEvent(moveDirection, newLocation);
+	auto* moveEvent = (crs::MoveEvent*) event;
+	PluginManager::instance.broadcastEvent(event);
+
+	if (moveEvent->isCancelled()) {
+		delete newLocation;
+		delete event;
+		return;
+	}
+	delete event;
+
+	playersMoving[player->getId()] = moveDirection;
+	player->setLocation(newLocation);
+
+	if (!Network::client && player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
+		score++;
+		setZoom(zoom + 0.1f);
+		crs::Location* newFruitLoc = randomFruitLocation();
+
+		crs::Event *event = new crs::CrossFoundEvent(crs::Location(fruitLocation->getX(),fruitLocation->getY()), newFruitLoc);
+		PluginManager::instance.broadcastEvent(event);
+
+		setFruitLocation(((crs::CrossFoundEvent *) event)->getNewCrossLocation());
+		delete event;
 	}
 }
 
 void Game::setFps(int fps) {
 	hud->setFps(fps);
+}
+
+void Game::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
+	float viewWidth;
+	float viewHeight;
+	if (windowWidth > windowHeight) {
+		viewWidth = (float) windowWidth / (float) windowHeight * mapSize;
+		viewHeight = mapSize;
+	} else {
+		viewWidth = mapSize;
+		viewHeight = (float) windowHeight / (float) windowWidth * mapSize;
+	}
+	view->setSize(viewWidth, viewHeight);
+	//view->zoom(zoom);
+
+	hud->adjustSize(windowWidth, windowHeight);
 }
 
 void Game::setTileType(const crs::Location& location, crs::TileType type) {
@@ -523,6 +540,10 @@ void Game::setTileType(const crs::Location& location, crs::TileType type) {
 
 crs::TileType Game::getTileType(const crs::Location& location) {
 	return map[location.getX()][location.getY()].getType();
+}
+
+sf::RenderWindow* Game::getWindow() {
+	return window;
 }
 
 Game *Game::get() {

@@ -2,6 +2,7 @@
 #include "hud.hpp"
 
 Hud::Hud(Game* game) : game(game) {
+	window = game->getWindow();
 	view = sf::View();
 
 	gameOverText = sf::Text();
@@ -14,12 +15,9 @@ Hud::Hud(Game* game) : game(game) {
 	fpsText.setString("Fps: 0");
 }
 
-void Hud::draw(sf::RenderWindow* window) {
-	view.setCenter((float) width / 2, (float) height / 2);
-	view.reset(sf::FloatRect(0, 0, (float) window->getSize().x, (float) window->getSize().y));
+void Hud::draw() {
 	window->setView(view);
 
-	fpsText.setPosition(window->getSize().x - fpsText.getLocalBounds().width, 0);
 	window->draw(fpsText);
 
 	if (game->isGameOver()) {
@@ -30,4 +28,10 @@ void Hud::draw(sf::RenderWindow* window) {
 
 void Hud::setFps(int fps) {
 	fpsText.setString("Fps: " + std::to_string(fps));
+	fpsText.setPosition((float) window->getSize().x - fpsText.getLocalBounds().width, 0);
+}
+
+void Hud::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
+	view.reset(sf::FloatRect(0, 0, (float) windowWidth, (float) windowHeight));
+	fpsText.setPosition((float) windowWidth - fpsText.getLocalBounds().width, 0);
 }

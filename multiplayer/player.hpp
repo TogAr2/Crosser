@@ -12,6 +12,8 @@
 class RemotePlayer;
 
 class Player {
+	static std::shared_ptr<sf::Texture> texture;
+
 	const bool remote;
 	int id;
 	sf::Color color{};
@@ -43,6 +45,7 @@ class RemotePlayer : public Player {
 
 public:
 	RemotePlayer(crs::Location *location, const sf::Color &color, const int &id, sf::TcpSocket* socket);
+	~RemotePlayer();
 
 	[[nodiscard]] sf::TcpSocket *getSocket() const;
 };

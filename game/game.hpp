@@ -45,6 +45,7 @@ private:
 	int maxWaitBeforeZoom = 3;
 
 	sf::RenderWindow* window;
+	sf::View* view;
 	sf::Font* mainFont;
 	Hud* hud = nullptr;
 
@@ -69,18 +70,19 @@ public:
 
 	void setZoom(float zoom);
 	void setFruitLocation(crs::Location *location);
-	bool controlPlayer(crs::Direction moveDirection);
+	void controlPlayer(crs::Direction moveDirection);
 	void requestMove(Player* player, crs::Direction moveDirection);
 	void movePlayer(Player* player, crs::Direction moveDirection);
 
 	void setFps(int fps);
+	void adjustSize(unsigned int windowWidth, unsigned int windowHeight);
 
 	void setTileType(const crs::Location& location, crs::TileType type);
 	crs::TileType getTileType(const crs::Location& location);
 
-	static Game* get();
+	sf::RenderWindow* getWindow();
 
-	crs::Location *getFruitLocation() const;
+	static Game* get();
 
 	Player* newPlayer(crs::Location *location, const sf::Color &color, sf::TcpSocket* socket = nullptr);
 };
