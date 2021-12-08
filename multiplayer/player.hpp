@@ -46,7 +46,7 @@ public:
 	void setLastMoveTime(int lastMoveTime);
 
 	int getScore() const;
-	void setScore(int score);
+	virtual void setScore(int score);
 };
 
 class RemotePlayer : public Player {
@@ -58,7 +58,7 @@ public:
 
 	[[nodiscard]] sf::TcpSocket *getSocket() const;
 
-	void setScore(int score);
+	void setScore(int score) override;
 };
 
 #endif //CROSSER_PLAYER_HPP

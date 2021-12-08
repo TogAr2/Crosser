@@ -514,11 +514,7 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	player->setLastMoveTime(0);
 
 	if (!Network::client && player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
-		if (player->isRemote()) {
-			((RemotePlayer*) player)->setScore(player->getScore() + 1);
-		} else {
-			player->setScore(player->getScore() + 1);
-		}
+		player->setScore(player->getScore() + 1);
 		setZoom(zoom + 0.1f);
 		crs::Location* newFruitLoc = randomFruitLocation();
 
