@@ -26,6 +26,7 @@ public:
 	std::mt19937 random;
 
 	crs::Direction direction;
+	int moveCooldown;
 	std::unordered_map<int, crs::Direction> playersMoving;
 	std::queue<std::pair<Player*, crs::Direction>*> moveRequests;
 

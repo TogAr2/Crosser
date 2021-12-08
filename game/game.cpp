@@ -8,11 +8,11 @@
 Game* Game::instance = nullptr;
 
 void Game::addRandomObstacle() {
-	std::uniform_int_distribution<int> widthDistribution(0, width / 2);
-	std::uniform_int_distribution<int> heightDistribution(0, height / 2);
+	std::uniform_int_distribution<int> widthDistribution(0, width);
+	std::uniform_int_distribution<int> heightDistribution(0, height);
 
-	int obstacleX = widthDistribution(random) * 2;
-	int obstacleY = heightDistribution(random) * 2;
+	int obstacleX = widthDistribution(random);
+	int obstacleY = heightDistribution(random);
 
 	if (map[obstacleX][obstacleY].getType() == crs::AIR) {
 		map[obstacleX][obstacleY].setType(crs::OBSTACLE);
@@ -132,6 +132,7 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 
 	gameOver = false;
 	direction = crs::STOP;
+	moveCooldown = 0;
 	score = 0;
 	this->window = window;
 
@@ -162,7 +163,7 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 	fruitLocation = randomFruitLocation();
 	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::FRUIT);
 
-	for (int i = 0; i < 30; i++) {
+	for (int i = 0; i < 60; i++) {
 		addRandomObstacle();
 	}
 }
@@ -205,8 +206,6 @@ void Game::draw(float alpha) {
 }
 
 void Game::input() {
-	direction = crs::STOP;
-
 	sf::Event event{};
 	while (window->pollEvent(event)) {
 		if (event.type == sf::Event::KeyPressed) {
@@ -251,6 +250,18 @@ void Game::input() {
 			} else if (event.key.code == sf::Keyboard::L) {
 				Network::connect();
 			}
+		} else if (event.type == sf::Event::KeyReleased) {
+			if (direction == crs::UP && (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)) {
+				direction = crs::STOP;
+			} else if (direction == crs::LEFT && (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)) {
+				direction = crs::STOP;
+			} else if (direction == crs::DOWN && (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)) {
+				direction = crs::STOP;
+			} else if (direction == crs::RIGHT && (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)) {
+				direction = crs::STOP;
+			} else if (direction == crs::AUTO && event.key.code == sf::Keyboard::M) {
+				direction = crs::STOP;
+			}
 		} else if (event.type == sf::Event::Closed) {
 			window->close();
 		} else if (event.type == sf::Event::Resized) {
@@ -268,10 +279,6 @@ void Game::logic() {
 		waitBeforeZoom--;
 	}
 
-	for (auto &pair : playersMoving) {
-		pair.second = crs::STOP;
-	}
-
 	if (Network::client) {
 		Network::receive();
 	} else {
@@ -280,6 +287,13 @@ void Game::logic() {
 			movePlayer(pair->first, pair->second);
 			moveRequests.pop();
 			delete pair;
+		}
+	}
+
+	for (auto &pair : players) {
+		pair.second->update();
+		if (pair.second->getLastMoveTime() >= 2) {
+			playersMoving[pair.first] = crs::STOP;
 		}
 	}
 
@@ -336,6 +350,7 @@ void Game::setFruitLocation(crs::Location *location) {
 }
 
 void Game::controlPlayer(crs::Direction moveDirection) {
+	if (clientPlayer->getLastMoveTime() < 2) return;
 	if (direction == crs::STOP) return;
 
 	int fruitX = fruitLocation->getX();
@@ -423,9 +438,11 @@ void Game::controlPlayer(crs::Direction moveDirection) {
 			break;
 	}
 
-	movePlayer(clientPlayer, playersMoving[clientPlayer->getId()]);
-	if (Network::client || Network::serverUp) {
-		Network::sendMove(playersMoving[clientPlayer->getId()]);
+	if (playersMoving[clientPlayer->getId()] != crs::STOP) {
+		movePlayer(clientPlayer, playersMoving[clientPlayer->getId()]);
+		if (Network::client || Network::serverUp) {
+			Network::sendMove(playersMoving[clientPlayer->getId()]);
+		}
 	}
 }
 
@@ -500,6 +517,7 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 
 	playersMoving[player->getId()] = moveDirection;
 	player->setLocation(newLocation);
+	player->setLastMoveTime(0);
 
 	if (!Network::client && player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
 		score++;

@@ -19,11 +19,14 @@ class Player {
 	sf::Color color{};
 	crs::Location* location{};
 
+	int lastMoveTime;
+
 public:
 	Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote = false);
 	Player(Player const &player);
 	~Player();
 
+	void update();
 	void draw(sf::RenderWindow* window, const float& alpha);
 
 	crs::Location* &getLocation();
@@ -38,6 +41,9 @@ public:
 	[[nodiscard]] bool isRemote() const;
 
 	[[nodiscard]] RemotePlayer *getRemote() const;
+
+	int getLastMoveTime() const;
+	void setLastMoveTime(int lastMoveTime);
 };
 
 class RemotePlayer : public Player {
