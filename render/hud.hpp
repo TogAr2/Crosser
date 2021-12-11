@@ -2,19 +2,17 @@
 #define CROSSER_HUD_HPP
 
 #include <SFML/Graphics.hpp>
-#include "game.hpp"
+#include "../game/game.hpp"
+#include "gui.hpp"
 
 class Hud {
-	Game* game;
-	sf::RenderWindow* window;
-	sf::View view;
 	sf::Text gameOverText;
 	sf::Text fpsText;
 
 public:
-	explicit Hud(Game* game);
+	explicit Hud(const sf::Font &font);
 
-	void draw();
+	void draw(sf::RenderWindow* &window);
 	void setFps(int fps);
 
 	void adjustSize(unsigned int windowWidth, unsigned int windowHeight);

@@ -5,8 +5,6 @@
 
 #include <SFML/Graphics.hpp>
 
-Game* Game::instance = nullptr;
-
 void Game::addRandomObstacle() {
 	std::uniform_int_distribution<int> widthDistribution(0, width);
 	std::uniform_int_distribution<int> heightDistribution(0, height);
@@ -25,9 +23,9 @@ bool Game::isObstacle(int locX, int locY) {
 	return map[locX][locY].getType() == crs::OBSTACLE;
 }
 
-crs::Location *Game::randomFruitLocation() {
-	sf::Vector2<float> viewSize = view->getSize();
-	sf::Vector2<float> viewOrigin = sf::Vector2<float>(view->getCenter().x - (viewSize.x / 2), view->getCenter().y - (viewSize.y / 2));
+crs::Location Game::randomFruitLocation() {
+	sf::Vector2<float> viewSize = view.getSize();
+	sf::Vector2<float> viewOrigin = sf::Vector2<float>(view.getCenter().x - (viewSize.x / 2), view.getCenter().y - (viewSize.y / 2));
 
 	std::uniform_int_distribution<int> widthDistribution(viewOrigin.x, viewOrigin.x + viewSize.x - 1);
 	std::uniform_int_distribution<int> heightDistribution(viewOrigin.y, viewOrigin.y + viewSize.y - 1);
@@ -39,7 +37,7 @@ crs::Location *Game::randomFruitLocation() {
 		return randomFruitLocation();
 	}
 
-	return new crs::Location(newFruitX, newFruitY);
+	return {newFruitX, newFruitY};
 }
 
 bool Game::bfs() {
@@ -126,13 +124,9 @@ bool Game::bfs() {
 	return reachedFinish;
 }
 
-Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
-	instance = this;
-	crs::currentGame = this;
-
+Game::Game() { // NOLINT(cert-msc51-cpp)
 	gameOver = false;
 	direction = crs::STOP;
-	this->window = window;
 
 	random.seed(time(nullptr) * 5);
 
@@ -143,32 +137,20 @@ Game::Game(sf::RenderWindow* window) { // NOLINT(cert-msc51-cpp)
 		}
 	}
 
-	mainFont = new sf::Font();
-	if (!mainFont->loadFromFile("/System/Library/Fonts/Helvetica.ttc")) {
-		std::cout << Logger::error << " Could not load font!" << std::endl;
-	}
-
-	hud = new Hud(this);
-
-	view = new sf::View();
-	view->setCenter(mapSize / 2, mapSize / 2);
-	adjustSize(window->getSize().x, window->getSize().y);
+	view.setCenter(mapSize / 2, mapSize / 2);
 
 	clientPlayer = newPlayer(new crs::Location(width / 2, height / 2), sf::Color::Cyan);
 	players[clientPlayer->getId()] = clientPlayer;
 	playersMoving[clientPlayer->getId()] = crs::STOP;
 
-	fruitLocation = randomFruitLocation();
-	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::FRUIT);
+	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::FRUIT);
 
 	for (int i = 0; i < 60; i++) {
 		addRandomObstacle();
 	}
 }
 
-void Game::draw(float alpha) {
-	window->clear(sf::Color(184, 115, 51));
-
+void Game::draw(sf::RenderWindow* &window, float alpha) {
 	if (!gameOver && zoom != previousZoom) {
 		//Interpolate zoom
 		float framesPassed;
@@ -182,7 +164,7 @@ void Game::draw(float alpha) {
 		//view->zoom(newZoom);
 	}
 
-	window->setView(*view);
+	window->setView(view);
 
 	sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(mapSize, mapSize));
 	shape.setFillColor(sf::Color::Black);
@@ -197,73 +179,58 @@ void Game::draw(float alpha) {
 	for (auto & pair : players) {
 		pair.second->draw(window, alpha);
 	}
-
-	hud->draw();
-
-	window->display();
 }
 
-void Game::input() {
-	sf::Event event{};
-	while (window->pollEvent(event)) {
-		if (event.type == sf::Event::KeyPressed) {
-			if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
-				direction = crs::UP;
-			} else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
-				direction = crs::LEFT;
-			} else if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) {
-				direction = crs::DOWN;
-			} else if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) {
-				direction = crs::RIGHT;
-			} else if (event.key.code == sf::Keyboard::M) {
-				direction = crs::AUTO;
-			} else if (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::Escape) {
-				if (!gameOver) {
-					crs::Event *crsEvent = new crs::QuitEvent();
-					auto *quitEvent = (crs::QuitEvent *) crsEvent;
-					PluginManager::instance.broadcastEvent(crsEvent);
+void Game::onInput(const sf::Event &event) {
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
+			direction = crs::UP;
+		} else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
+			direction = crs::LEFT;
+		} else if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) {
+			direction = crs::DOWN;
+		} else if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) {
+			direction = crs::RIGHT;
+		} else if (event.key.code == sf::Keyboard::M) {
+			direction = crs::AUTO;
+		} else if (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::Escape) {
+			if (!gameOver) {
+				crs::Event *crsEvent = new crs::QuitEvent();
+				auto *quitEvent = (crs::QuitEvent *) crsEvent;
+				PluginManager::instance.broadcastEvent(crsEvent);
 
-					gameOver = !quitEvent->isCancelled();
+				gameOver = !quitEvent->isCancelled();
 
-					if (gameOver && Network::client) {
-						Network::disconnect();
-					}
-					if (gameOver && Network::serverUp) {
-						Network::serverUp = false;
-					}
+				if (gameOver && Network::client) {
+					Network::disconnect();
 				}
-
-				if (event.key.code == sf::Keyboard::Escape) {
-					window->close();
+				if (gameOver && Network::serverUp) {
+					Network::serverUp = false;
 				}
-			} else if (event.key.code == sf::Keyboard::B) {
-				std::cout << Logger::info << "Player: " << clientPlayer->getLocation()->getX() << " "
-						  << clientPlayer->getLocation()->getY() << std::endl;
-				std::cout << Logger::info << "Fruit: " << fruitLocation->getX() << " " << fruitLocation->getY()
-						  << std::endl;
-			} else if (event.key.code == sf::Keyboard::U) {
-				setZoom(zoom + 0.1f);
-			} else if (event.key.code == sf::Keyboard::K) {
-				Network::startServer();
-			} else if (event.key.code == sf::Keyboard::L) {
-				Network::connect();
 			}
-		} else if (event.type == sf::Event::KeyReleased) {
-			if (direction == crs::UP && (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)) {
-				direction = crs::STOP;
-			} else if (direction == crs::LEFT && (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)) {
-				direction = crs::STOP;
-			} else if (direction == crs::DOWN && (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)) {
-				direction = crs::STOP;
-			} else if (direction == crs::RIGHT && (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)) {
-				direction = crs::STOP;
-			} else if (direction == crs::AUTO && event.key.code == sf::Keyboard::M) {
-				direction = crs::STOP;
-			}
-		} else if (event.type == sf::Event::Closed) {
-			window->close();
-		} else if (event.type == sf::Event::Resized) {
-			adjustSize(event.size.width, event.size.height);
+		} else if (event.key.code == sf::Keyboard::B) {
+			std::cout << Logger::info << "Player: " << clientPlayer->getLocation()->getX() << " "
+					  << clientPlayer->getLocation()->getY() << std::endl;
+			std::cout << Logger::info << "Fruit: " << fruitLocation.getX() << " " << fruitLocation.getY()
+					  << std::endl;
+		} else if (event.key.code == sf::Keyboard::U) {
+			setZoom(zoom + 0.1f);
+		} else if (event.key.code == sf::Keyboard::K) {
+			Network::startServer();
+		} else if (event.key.code == sf::Keyboard::L) {
+			Network::connect();
+		}
+	} else if (event.type == sf::Event::KeyReleased) {
+		if (direction == crs::UP && (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)) {
+			direction = crs::STOP;
+		} else if (direction == crs::LEFT && (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)) {
+			direction = crs::STOP;
+		} else if (direction == crs::DOWN && (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)) {
+			direction = crs::STOP;
+		} else if (direction == crs::RIGHT && (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)) {
+			direction = crs::STOP;
+		} else if (direction == crs::AUTO && event.key.code == sf::Keyboard::M) {
+			direction = crs::STOP;
 		}
 	}
 }
@@ -302,10 +269,6 @@ void Game::logic() {
 	return gameOver;
 }
 
-[[nodiscard]] sf::Font* Game::getMainFont() {
-	return mainFont;
-}
-
 void Game::setZoom(float newZoom) {
 	if (newZoom <= 1.1 && newZoom >= 0) {
 		previousZoom = zoom;
@@ -315,40 +278,32 @@ void Game::setZoom(float newZoom) {
 }
 
 Game::~Game() {
-	delete fruitLocation;
-	delete mainFont;
-	delete hud;
-	delete view;
-
 	for (auto & pair : players) {
 		delete pair.second;
 	}
-
-	Game::instance = nullptr;
 }
 
-void Game::setFruitLocation(crs::Location *location) {
+void Game::setFruitLocation(const crs::Location& location) {
 	bool send = Network::serverUp;
 
-	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::AIR);
-	if (send) Network::sendTileUpdate(*fruitLocation, crs::AIR);
-	delete fruitLocation;
+	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::AIR);
+	if (send) Network::sendTileUpdate(fruitLocation, crs::AIR);
 
 	fruitLocation = location;
-	if (map[fruitLocation->getX()][fruitLocation->getY()].getType() != crs::AIR) {
+	if (map[fruitLocation.getX()][fruitLocation.getY()].getType() != crs::AIR) {
 		fruitLocation = randomFruitLocation();
 		std::cerr << Logger::warning << "Cross placed on not-air tile by plugin. Location changed." << std::endl;
 	}
-	map[fruitLocation->getX()][fruitLocation->getY()].setType(crs::FRUIT);
-	if (send) Network::sendTileUpdate(*fruitLocation, crs::FRUIT);
+	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::FRUIT);
+	if (send) Network::sendTileUpdate(fruitLocation, crs::FRUIT);
 }
 
 void Game::controlPlayer(crs::Direction moveDirection) {
 	if (clientPlayer->getLastMoveTime() < 2) return;
 	if (direction == crs::STOP) return;
 
-	int fruitX = fruitLocation->getX();
-	int fruitY = fruitLocation->getY();
+	int fruitX = fruitLocation.getX();
+	int fruitY = fruitLocation.getY();
 
 	int x = clientPlayer->getLocation()->getX();
 	int y = clientPlayer->getLocation()->getY();
@@ -513,21 +468,18 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	player->setLocation(newLocation);
 	player->setLastMoveTime(0);
 
-	if (!Network::client && player->getLocation()->getX() == fruitLocation->getX() && player->getLocation()->getY() == fruitLocation->getY()) {
+	if (!Network::client && player->getLocation()->getX() == fruitLocation.getX() && player->getLocation()->getY() == fruitLocation.getY()) {
 		player->setScore(player->getScore() + 1);
 		setZoom(zoom + 0.1f);
-		crs::Location* newFruitLoc = randomFruitLocation();
+		crs::Location newFruitLoc = randomFruitLocation();
 
-		crs::Event *event = new crs::CrossFoundEvent(crs::Location(fruitLocation->getX(),fruitLocation->getY()), newFruitLoc);
+		crs::Event *event = new crs::CrossFoundEvent(fruitLocation, &newFruitLoc);
 		PluginManager::instance.broadcastEvent(event);
 
-		setFruitLocation(((crs::CrossFoundEvent *) event)->getNewCrossLocation());
+		auto* crossFoundEvent = (crs::CrossFoundEvent*) event;
+		setFruitLocation(*crossFoundEvent->getNewCrossLocation());
 		delete event;
 	}
-}
-
-void Game::setFps(int fps) {
-	hud->setFps(fps);
 }
 
 void Game::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
@@ -540,10 +492,8 @@ void Game::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
 		viewWidth = mapSize;
 		viewHeight = (float) windowHeight / (float) windowWidth * mapSize;
 	}
-	view->setSize(viewWidth, viewHeight);
+	view.setSize(viewWidth, viewHeight);
 	//view->zoom(zoom);
-
-	hud->adjustSize(windowWidth, windowHeight);
 }
 
 void Game::setTileType(const crs::Location& location, crs::TileType type) {
@@ -552,14 +502,6 @@ void Game::setTileType(const crs::Location& location, crs::TileType type) {
 
 crs::TileType Game::getTileType(const crs::Location& location) {
 	return map[location.getX()][location.getY()].getType();
-}
-
-sf::RenderWindow* Game::getWindow() {
-	return window;
-}
-
-Game *Game::get() {
-	return instance;
 }
 
 Player *Game::newPlayer(crs::Location *location, const sf::Color &color, sf::TcpSocket* socket) {

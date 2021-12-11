@@ -2,6 +2,7 @@
 #include "player.hpp"
 #include "../game/game.hpp"
 #include "network.hpp"
+#include "../render/render.hpp"
 
 std::shared_ptr<sf::Texture> Player::texture = std::shared_ptr<sf::Texture>();
 
@@ -39,7 +40,7 @@ void Player::update() {
 }
 
 void Player::draw(sf::RenderWindow *window, const float &alpha) {
-	Game* game = Game::get();
+	Game* game = Render::get()->getGame();
 
 	//sf::Sprite shape(*texture);
 	//shape.setScale(40, 40);

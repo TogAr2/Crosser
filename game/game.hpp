@@ -6,20 +6,14 @@
 #include <unordered_map>
 #include <queue>
 
-#include "config.hpp"
 #include "tile.hpp"
 #include "api-utils.hpp"
 #include "IGame.hpp"
 #include "../multiplayer/player.hpp"
-#include "hud.hpp"
 
 #include "../plugins/pluginManager.hpp"
 
-class Hud;
-
 class Game : public crs::IGame {
-	static Game* instance;
-
 	int lastId = -1;
 
 public:
@@ -37,50 +31,41 @@ public:
 
 private:
 	bool gameOver;
-	crs::Location* fruitLocation = nullptr;
+	crs::Location fruitLocation = crs::Location(width / 2, height / 2);
 	float zoom = 0.1;
 	float previousZoom = 0.1;
 	int waitBeforeZoom = 0;
 	int maxWaitBeforeZoom = 3;
 
-	sf::RenderWindow* window;
-	sf::View* view;
-	sf::Font* mainFont;
-	Hud* hud = nullptr;
+	sf::View view;
 
 	void addRandomObstacle();
 	bool isObstacle(int locX, int locY);
-	crs::Location *randomFruitLocation();
+	crs::Location randomFruitLocation();
 
 	int moveCount = 0;
 	bool bfs();
 
 public:
-	explicit Game(sf::RenderWindow* window);
+	explicit Game();
 	~Game();
 
-	void draw(float alpha);
-	void input();
+	void draw(sf::RenderWindow* &window, float alpha);
+	void onInput(const sf::Event &event);
 	void logic();
 
 	[[nodiscard]] bool isGameOver() const;
-	[[nodiscard]] sf::Font* getMainFont();
 
 	void setZoom(float zoom);
-	void setFruitLocation(crs::Location *location);
+	void setFruitLocation(const crs::Location &location);
 	void controlPlayer(crs::Direction moveDirection);
 	void requestMove(Player* player, crs::Direction moveDirection);
 	void movePlayer(Player* player, crs::Direction moveDirection);
 
-	void setFps(int fps);
 	void adjustSize(unsigned int windowWidth, unsigned int windowHeight);
 
 	void setTileType(const crs::Location& location, crs::TileType type);
 	crs::TileType getTileType(const crs::Location& location);
-
-	sf::RenderWindow* getWindow();
-
-	static Game* get();
 
 	Player* newPlayer(crs::Location *location, const sf::Color &color, sf::TcpSocket* socket = nullptr);
 };

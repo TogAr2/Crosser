@@ -3,6 +3,7 @@
 #include <thread>
 #include "network.hpp"
 #include "../game/game.hpp"
+#include "../render/render.hpp"
 
 std::string Network::ip = "localhost";
 unsigned short Network::port = 3000;
@@ -30,7 +31,7 @@ void Network::startServer() {
 
 		selector.add(listener);
 
-		Game* game = Game::get();
+		Game* game = Render::get()->getGame();
 
 		while (serverUp) {
 			auto* socket = new sf::TcpSocket();
@@ -125,7 +126,7 @@ void Network::startServer() {
 }
 
 void Network::sendPacketToAll(sf::Packet & packet, int skip) {
-	for (auto & pair : Game::get()->players) {
+	for (auto & pair : Render::get()->getGame()->players) {
 		Player* player = pair.second;
 
 		if (skip == player->getId()) continue;
@@ -154,7 +155,7 @@ void Network::disconnect() {
 	sf::Packet packet;
 
 	packet << PacketNumber::DISCONNECT;
-	packet << Game::get()->clientPlayer->getId();
+	packet << Render::get()->getGame()->clientPlayer->getId();
 
 	if (clientSocket->send(packet) != sf::Socket::Done) {
 		std::cout << Logger::info << "Failed to disconnect from server!" << std::endl;
@@ -164,13 +165,13 @@ void Network::disconnect() {
 }
 
 void Network::receive() {
+	Game* game = Render::get()->getGame();
+
 	sf::Packet received;
 	int packetNumber, id;
 	if (clientSocket->receive(received) == sf::Socket::Done) {
 		received >> packetNumber;
 		received >> id;
-
-		Game* game = Game::get();
 
 		if (packetNumber == PacketNumber::INITIAL_INFO) {
 			game->players.erase(game->clientPlayer->getId());
@@ -242,7 +243,7 @@ void Network::receive() {
 }
 
 void Network::sendMove(crs::Direction direction) {
-	Game* game = Game::get();
+	Game* game = Render::get()->getGame();
 
 	sf::Packet packet;
 	packet << PacketNumber::MOVE;
@@ -258,7 +259,7 @@ void Network::sendMove(crs::Direction direction) {
 }
 
 void Network::sendTileUpdate(const crs::Location& location, const crs::TileType& type) {
-	Game* game = Game::get();
+	Game* game = Render::get()->getGame();
 
 	sf::Packet packet;
 	packet << PacketNumber::TILE_UPDATE;
@@ -272,8 +273,6 @@ void Network::sendTileUpdate(const crs::Location& location, const crs::TileType&
 }
 
 void Network::sendScoreUpdate(sf::TcpSocket *socket, int score) {
-	Game* game = Game::get();
-
 	sf::Packet packet;
 	packet << PacketNumber::SCORE_UPDATE;
 	packet << -1;

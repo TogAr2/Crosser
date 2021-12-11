@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 
-#include "../game/game.hpp"
+#include "../render/render.hpp"
 #include "config.hpp"
 #include "logger.hpp"
 #include "../multiplayer/network.hpp"
@@ -23,10 +23,10 @@ int main(int argc, char* argv[]) {
     window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
 
-  	Game game(&window);
+  	Render render(&window);
 	PluginManager::instance.start();
 
-  	game.draw(0);
+  	render.draw(0);
 
   	using clock = std::chrono::high_resolution_clock;
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   	while (window.isOpen()) {
 		countedFrames++;
 		if (sfClock.getElapsedTime().asMilliseconds() >= 1000) {
-			game.setFps(countedFrames);
+			render.getHud()->setFps(countedFrames);
 			sfClock.restart();
 			countedFrames = 0;
 		}
@@ -51,13 +51,13 @@ int main(int argc, char* argv[]) {
   		while (lag >= timestep) {
   			lag -= timestep;
 
-			game.input();
-  			game.logic(); //Update at a fixed state each time
+			render.input();
+  			render.logic(); //Update at a fixed state each time
   		}
 
   		//Calculate how close or far we are from the next timestep
   		float alpha = (float) lag.count() / timestep.count();
-  		game.draw(alpha);
+  		render.draw(alpha);
   	}
 
   	PluginManager::instance.end();
