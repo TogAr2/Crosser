@@ -28,6 +28,12 @@ sf::Text* TextGuiElement::getText() {
 	return &text;
 }
 
+void TextGuiElement::setAlpha(int alpha) {
+	sf::Color color = text.getFillColor();
+	color.a = alpha;
+	text.setFillColor(color);
+}
+
 ButtonGuiElement::ButtonGuiElement(const sf::RectangleShape &background, sf::Text text, std::optional<std::function<void(sf::Mouse::Button)>> callback) : GuiElement(background.getGlobalBounds(), std::move(callback)), background(background), text(std::move(text)) {}
 
 void ButtonGuiElement::draw(sf::RenderWindow *&window) const {
@@ -58,6 +64,20 @@ sf::RectangleShape* ButtonGuiElement::getBackground() {
 
 sf::Text* ButtonGuiElement::getText() {
 	return &text;
+}
+
+void ButtonGuiElement::setAlpha(int alpha) {
+	sf::Color backgroundColor = background.getFillColor();
+	backgroundColor.a = alpha;
+	background.setFillColor(backgroundColor);
+
+	sf::Color outlineColor = background.getOutlineColor();
+	outlineColor.a = alpha;
+	background.setOutlineColor(outlineColor);
+
+	sf::Color textColor = text.getFillColor();
+	textColor.a = alpha;
+	text.setFillColor(textColor);
 }
 
 Gui::~Gui() {

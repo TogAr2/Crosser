@@ -18,6 +18,8 @@ public:
 	bool isHovered(float mouseX, float mouseY) const;
 	void onClick(sf::Mouse::Button button);
 	virtual void draw(sf::RenderWindow* &window) const = 0;
+
+	virtual void setAlpha(int alpha) = 0;
 };
 
 class TextGuiElement : public GuiElement {
@@ -29,6 +31,8 @@ public:
 	void draw(sf::RenderWindow* &window) const override;
 
 	sf::Text* getText();
+
+	void setAlpha(int alpha) override;
 };
 
 class ButtonGuiElement : public GuiElement {
@@ -44,6 +48,8 @@ public:
 
 	sf::RectangleShape* getBackground();
 	sf::Text* getText();
+
+	void setAlpha(int alpha) override;
 };
 
 class Gui {
