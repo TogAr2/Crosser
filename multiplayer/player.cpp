@@ -40,7 +40,8 @@ void Player::update() {
 }
 
 void Player::draw(sf::RenderWindow *window, const float &alpha) {
-	Game* game = Render::get()->getGame();
+	std::optional<Game>* optionalGame = Render::get()->getGame();
+	Game* game = optionalGame->operator->();
 
 	//sf::Sprite shape(*texture);
 	//shape.setScale(40, 40);

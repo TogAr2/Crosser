@@ -7,7 +7,6 @@
 
 #include <chrono>
 
-using namespace std;
 using namespace std::chrono_literals;
 
 constexpr std::chrono::nanoseconds timestep(50ms);
@@ -19,14 +18,12 @@ int main(int argc, char* argv[]) {
 		Network::port = std::stoi(argv[2]);
 	}
 
-    sf::RenderWindow window(sf::VideoMode(width * blockSize * 2, height * blockSize * 2), "Crosser v" + (string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+    sf::RenderWindow window(sf::VideoMode(width * blockSize * 2, height * blockSize * 2), "Crosser v" + (std::string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
     window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
 
   	Render render(&window);
 	PluginManager::instance.start();
-
-  	render.draw(0);
 
   	using clock = std::chrono::high_resolution_clock;
 
@@ -56,7 +53,7 @@ int main(int argc, char* argv[]) {
   		}
 
   		//Calculate how close or far we are from the next timestep
-  		float alpha = (float) lag.count() / timestep.count();
+  		float alpha = (float) lag.count() / (float) timestep.count();
   		render.draw(alpha);
   	}
 

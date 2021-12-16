@@ -31,7 +31,8 @@ void Network::startServer() {
 
 		selector.add(listener);
 
-		Game* game = Render::get()->getGame();
+		std::optional<Game>* optionalGame = Render::get()->getGame();
+		Game* game = optionalGame->operator->();
 
 		while (serverUp) {
 			auto* socket = new sf::TcpSocket();
@@ -126,7 +127,7 @@ void Network::startServer() {
 }
 
 void Network::sendPacketToAll(sf::Packet & packet, int skip) {
-	for (auto & pair : Render::get()->getGame()->players) {
+	for (auto & pair : Render::get()->getGame()->operator->()->players) {
 		Player* player = pair.second;
 
 		if (skip == player->getId()) continue;
@@ -155,7 +156,7 @@ void Network::disconnect() {
 	sf::Packet packet;
 
 	packet << PacketNumber::DISCONNECT;
-	packet << Render::get()->getGame()->clientPlayer->getId();
+	packet << Render::get()->getGame()->operator->()->clientPlayer->getId();
 
 	if (clientSocket->send(packet) != sf::Socket::Done) {
 		std::cout << Logger::info << "Failed to disconnect from server!" << std::endl;
@@ -165,7 +166,8 @@ void Network::disconnect() {
 }
 
 void Network::receive() {
-	Game* game = Render::get()->getGame();
+	std::optional<Game>* optionalGame = Render::get()->getGame();
+	Game* game = optionalGame->operator->();
 
 	sf::Packet received;
 	int packetNumber, id;
@@ -243,7 +245,8 @@ void Network::receive() {
 }
 
 void Network::sendMove(crs::Direction direction) {
-	Game* game = Render::get()->getGame();
+	std::optional<Game>* optionalGame = Render::get()->getGame();
+	Game* game = optionalGame->operator->();
 
 	sf::Packet packet;
 	packet << PacketNumber::MOVE;
@@ -259,7 +262,8 @@ void Network::sendMove(crs::Direction direction) {
 }
 
 void Network::sendTileUpdate(const crs::Location& location, const crs::TileType& type) {
-	Game* game = Render::get()->getGame();
+	std::optional<Game>* optionalGame = Render::get()->getGame();
+	Game* game = optionalGame->operator->();
 
 	sf::Packet packet;
 	packet << PacketNumber::TILE_UPDATE;

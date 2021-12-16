@@ -6,8 +6,8 @@
 #include <SFML/Graphics.hpp>
 
 void Game::addRandomObstacle() {
-	std::uniform_int_distribution<int> widthDistribution(0, width);
-	std::uniform_int_distribution<int> heightDistribution(0, height);
+	std::uniform_int_distribution<int> widthDistribution(0, width - 1);
+	std::uniform_int_distribution<int> heightDistribution(0, height - 1);
 
 	int obstacleX = widthDistribution(random);
 	int obstacleY = heightDistribution(random);

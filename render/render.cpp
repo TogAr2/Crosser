@@ -1,5 +1,6 @@
 #include "logger.hpp"
 #include "render.hpp"
+#include "mainScreen.hpp"
 
 Render* Render::instance = nullptr;
 
@@ -11,19 +12,21 @@ Render::Render(sf::RenderWindow* window) : window(window) {
 	}
 
 	hud = new Hud(mainFont);
+	gui = new MainScreen();
 
 	adjustSize(window->getSize().x, window->getSize().y);
 }
 
 Render::~Render() {
 	delete hud;
+	delete gui;
 }
 
 sf::RenderWindow* &Render::getWindow() {
 	return window;
 }
 
-const sf::Font &Render::getMainFont() const {
+sf::Font Render::getMainFont() const {
 	return mainFont;
 }
 
@@ -31,29 +34,37 @@ Hud* Render::getHud() {
 	return hud;
 }
 
-Game* Render::getGame() {
+std::optional<Game>* Render::getGame() {
 	return &game;
 }
 
-void Render::setGame(Game &game) {
-	Render::game = game;
+void Render::setGame(Game* game) {
+	Render::game = *game;
+	resizeQueued = true;
 }
 
 Gui* Render::getGui() {
-	return &gui;
+	return gui;
 }
 
-void Render::setGui(Gui &gui) {
+void Render::setGui(Gui* gui) {
+	delete Render::gui;
 	Render::gui = gui;
 }
 
 void Render::draw(float alpha) {
-	window->clear(sf::Color(184, 115, 51));
+	if (resizeQueued) {
+		adjustSize(window->getSize().x, window->getSize().y);
+		resizeQueued = false;
+	}
 
-	game.draw(window, alpha);
+	window->clear(sf::Color::Black);
+
+	if (game.has_value())
+		game->draw(window, alpha);
 
 	window->setView(view);
-	gui.draw(window);
+	gui->draw(window, alpha);
 	hud->draw(window);
 
 	window->display();
@@ -62,16 +73,19 @@ void Render::draw(float alpha) {
 void Render::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
 	view.reset(sf::FloatRect(0, 0, (float) windowWidth, (float) windowHeight));
 
-	game.adjustSize(windowWidth, windowHeight);
+	if (game.has_value())
+		game->adjustSize(windowWidth, windowHeight);
+	gui->init(mainFont, windowWidth, windowHeight);
 	hud->adjustSize(windowWidth, windowHeight);
 }
 
 void Render::logic() {
 	sf::Vector2<int> mouse = sf::Mouse::getPosition(*window);
 	sf::Vector2<float> coords = window->mapPixelToCoords(mouse, view);
-	gui.update(coords.x, coords.y);
+	gui->update(coords.x, coords.y);
 
-	game.logic();
+	if (game.has_value())
+		game->logic();
 }
 
 void Render::input() {
@@ -82,16 +96,17 @@ void Render::input() {
 				window->close();
 			}
 		} else if (event.type == sf::Event::MouseButtonPressed) {
-			sf::Vector2<int> mouse = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+			sf::Vector2<int> mouse = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
 			sf::Vector2<float> coords = window->mapPixelToCoords(mouse, view);
-			gui.onClick(coords.x, coords.y);
+			gui->onClick(coords.x, coords.y, event.mouseButton.button);
 		} else if (event.type == sf::Event::Closed) {
 			window->close();
 		} else if (event.type == sf::Event::Resized) {
 			adjustSize(event.size.width, event.size.height);
 		}
 
-		game.onInput(event);
+		if (game.has_value())
+			game->onInput(event);
 	}
 }
 

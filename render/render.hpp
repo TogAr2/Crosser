@@ -9,9 +9,11 @@ class Render {
 	sf::RenderWindow* window;
 	sf::Font mainFont;
 	sf::View view;
-	Game game;
+	std::optional<Game> game;
 	Hud* hud = nullptr;
-	Gui gui;
+	Gui* gui = nullptr;
+
+	bool resizeQueued = false;
 
 public:
 	explicit Render(sf::RenderWindow* window);
@@ -19,15 +21,15 @@ public:
 
 	sf::RenderWindow* &getWindow();
 
-	const sf::Font &getMainFont() const;
+	sf::Font getMainFont() const;
 
 	Hud* getHud();
 
 	Gui* getGui();
-	void setGui(Gui &gui);
+	void setGui(Gui* gui);
 
-	Game* getGame();
-	void setGame(Game &game);
+	std::optional<Game>* getGame();
+	void setGame(Game* game);
 
 	void draw(float alpha);
 	void adjustSize(unsigned int windowWidth, unsigned int windowHeight);

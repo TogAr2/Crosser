@@ -16,8 +16,8 @@ class Player {
 
 	const bool remote;
 	int id;
-	sf::Color color{};
-	crs::Location* location{};
+	sf::Color color;
+	crs::Location* location;
 
 	int lastMoveTime;
 	int score;
