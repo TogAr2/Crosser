@@ -4,17 +4,7 @@
 #include "network.hpp"
 #include "../render/render.hpp"
 
-std::shared_ptr<sf::Texture> Player::texture = std::shared_ptr<sf::Texture>();
-
-Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote), lastMoveTime(0), score(0) {
-	if (texture == nullptr) {
-		texture = std::shared_ptr<sf::Texture>(new sf::Texture());
-		if (!texture->loadFromFile("resources/image.png")) {
-			std::cout << Logger::error << "Failed to load texture" << std::endl;
-		}
-		texture->setSmooth(false);
-	}
-}
+Player::Player(crs::Location *location, const sf::Color &color, const int &id, const bool &remote) : location(location), color(color), id(id), remote(remote), lastMoveTime(0), score(0) {}
 
 const sf::Color &Player::getColor() const {
 	return color;
@@ -33,18 +23,15 @@ Player::~Player() {
 	delete Player::location;
 }
 
-Player::Player(const Player &player): location(player.location), color(player.color), id(player.id), remote(player.remote), lastMoveTime(player.lastMoveTime), score(player.score) {};
+Player::Player(const Player &player) = default;
 
 void Player::update() {
 	lastMoveTime++;
 }
 
 void Player::draw(sf::RenderWindow *window, const float &alpha) {
-	std::optional<Game>* optionalGame = Render::get()->getGame();
-	Game* game = optionalGame->operator->();
+	Game* game = Render::get()->getGame();
 
-	//sf::Sprite shape(*texture);
-	//shape.setScale(40, 40);
 	sf::RectangleShape shape(sf::Vector2f(blockSize, blockSize));
 	shape.setPosition((float) location->getX() * blockSize, (float) location->getY() * blockSize);
 

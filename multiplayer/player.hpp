@@ -12,8 +12,6 @@
 class RemotePlayer;
 
 class Player {
-	static std::shared_ptr<sf::Texture> texture;
-
 	const bool remote;
 	int id;
 	sf::Color color;

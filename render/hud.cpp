@@ -16,9 +16,8 @@ Hud::Hud(const sf::Font &font) {
 void Hud::draw(sf::RenderWindow* &window) {
 	window->draw(fpsText);
 
-	std::optional<Game>* optionalGame = Render::get()->getGame();
-	if (optionalGame->has_value()) {
-		Game* game = optionalGame->operator->();
+	Game* game = Render::get()->getGame();
+	if (game != nullptr) {
 		if (game->isGameOver()) {
 			gameOverText.setString("Your score was: " + std::to_string(game->clientPlayer->getScore()));
 			window->draw(gameOverText);

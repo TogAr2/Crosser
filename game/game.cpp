@@ -124,7 +124,7 @@ bool Game::bfs() {
 	return reachedFinish;
 }
 
-Game::Game() { // NOLINT(cert-msc51-cpp)
+Game::Game(bool client): client(client) { // NOLINT(cert-msc51-cpp)
 	gameOver = false;
 	direction = crs::STOP;
 
@@ -140,17 +140,21 @@ Game::Game() { // NOLINT(cert-msc51-cpp)
 	view.setCenter(mapSize / 2, mapSize / 2);
 
 	clientPlayer = newPlayer(new crs::Location(width / 2, height / 2), sf::Color::Cyan);
-	players[clientPlayer->getId()] = clientPlayer;
-	playersMoving[clientPlayer->getId()] = crs::STOP;
+	if (!client) {
+		players[clientPlayer->getId()] = clientPlayer;
+		playersMoving[clientPlayer->getId()] = crs::STOP;
 
-	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::FRUIT);
+		map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::FRUIT);
 
-	for (int i = 0; i < 60; i++) {
-		addRandomObstacle();
+		for (int i = 0; i < 60; i++) {
+			addRandomObstacle();
+		}
 	}
 }
 
 void Game::draw(sf::RenderWindow* &window, float alpha) {
+	if (!isInitialized()) return;
+
 	if (!gameOver && zoom != previousZoom) {
 		//Interpolate zoom
 		float framesPassed;
@@ -165,10 +169,6 @@ void Game::draw(sf::RenderWindow* &window, float alpha) {
 	}
 
 	window->setView(view);
-
-	sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(mapSize, mapSize));
-	shape.setFillColor(sf::Color::Black);
-	window->draw(shape);
 
 	for (auto & loopX : map) {
 		for (auto & loopY : loopX) {
@@ -201,11 +201,13 @@ void Game::onInput(const sf::Event &event) {
 
 				gameOver = !quitEvent->isCancelled();
 
-				if (gameOver && Network::client) {
-					Network::disconnect();
-				}
-				if (gameOver && Network::serverUp) {
-					Network::serverUp = false;
+				if (gameOver) {
+					if (isClient()) {
+						network->disconnect();
+					}
+					if (isServer()) {
+						network->stopServer();
+					}
 				}
 			}
 		} else if (event.key.code == sf::Keyboard::B) {
@@ -216,9 +218,10 @@ void Game::onInput(const sf::Event &event) {
 		} else if (event.key.code == sf::Keyboard::U) {
 			setZoom(zoom + 0.1f);
 		} else if (event.key.code == sf::Keyboard::K) {
-			Network::startServer();
+			network = new Network(this);
+			network->startServer();
 		} else if (event.key.code == sf::Keyboard::L) {
-			Network::connect();
+			//Network::connect(std::string(), 0);
 		}
 	} else if (event.type == sf::Event::KeyReleased) {
 		if (direction == crs::UP && (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)) {
@@ -237,6 +240,11 @@ void Game::onInput(const sf::Event &event) {
 
 void Game::logic() {
 	if (gameOver) return;
+	if (!isInitialized()) {
+		if (network != nullptr) {
+			network->receive();
+		}
+	}
 
 	if (waitBeforeZoom == 0) {
 		previousZoom = zoom;
@@ -251,8 +259,8 @@ void Game::logic() {
 		}
 	}
 
-	if (Network::client) {
-		Network::receive();
+	if (isClient()) {
+		network->receive();
 	} else {
 		while (!moveRequests.empty()) {
 			std::pair<Player*, crs::Direction>* pair = moveRequests.front();
@@ -281,13 +289,15 @@ Game::~Game() {
 	for (auto & pair : players) {
 		delete pair.second;
 	}
+
+	delete network;
 }
 
 void Game::setFruitLocation(const crs::Location& location) {
-	bool send = Network::serverUp;
+	bool send = isServer();
 
 	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::AIR);
-	if (send) Network::sendTileUpdate(fruitLocation, crs::AIR);
+	if (send) network->sendTileUpdate(fruitLocation, crs::AIR);
 
 	fruitLocation = location;
 	if (map[fruitLocation.getX()][fruitLocation.getY()].getType() != crs::AIR) {
@@ -295,7 +305,7 @@ void Game::setFruitLocation(const crs::Location& location) {
 		std::cerr << Logger::warning << "Cross placed on not-air tile by plugin. Location changed." << std::endl;
 	}
 	map[fruitLocation.getX()][fruitLocation.getY()].setType(crs::FRUIT);
-	if (send) Network::sendTileUpdate(fruitLocation, crs::FRUIT);
+	if (send) network->sendTileUpdate(fruitLocation, crs::FRUIT);
 }
 
 void Game::controlPlayer(crs::Direction moveDirection) {
@@ -389,8 +399,8 @@ void Game::controlPlayer(crs::Direction moveDirection) {
 
 	if (playersMoving[clientPlayer->getId()] != crs::STOP) {
 		movePlayer(clientPlayer, playersMoving[clientPlayer->getId()]);
-		if (Network::client || Network::serverUp) {
-			Network::sendMove(playersMoving[clientPlayer->getId()]);
+		if (network != nullptr) {
+			network->sendMove(playersMoving[clientPlayer->getId()]);
 		}
 	}
 }
@@ -468,7 +478,7 @@ void Game::movePlayer(Player* player, crs::Direction moveDirection) {
 	player->setLocation(newLocation);
 	player->setLastMoveTime(0);
 
-	if (!Network::client && player->getLocation()->getX() == fruitLocation.getX() && player->getLocation()->getY() == fruitLocation.getY()) {
+	if (!isClient() && player->getLocation()->getX() == fruitLocation.getX() && player->getLocation()->getY() == fruitLocation.getY()) {
 		player->setScore(player->getScore() + 1);
 		setZoom(zoom + 0.1f);
 		crs::Location newFruitLoc = randomFruitLocation();
@@ -517,4 +527,24 @@ Player *Game::newPlayer(crs::Location *location, const sf::Color &color, sf::Tcp
 
 	players.insert_or_assign(id, player);
 	return player;
+}
+
+Network* Game::getNetwork() const {
+	return network;
+}
+
+void Game::setNetwork(Network* network) {
+	Game::network = network;
+}
+
+bool Game::isClient() {
+	return network != nullptr && network->isClient();
+}
+
+bool Game::isServer() {
+	return network != nullptr && network->isServer();
+}
+
+bool Game::isInitialized() {
+	return !client || (network != nullptr && network->isInitialized());
 }

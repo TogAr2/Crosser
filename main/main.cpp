@@ -3,7 +3,6 @@
 #include "../render/render.hpp"
 #include "config.hpp"
 #include "logger.hpp"
-#include "../multiplayer/network.hpp"
 
 #include <chrono>
 
@@ -12,10 +11,9 @@ using namespace std::chrono_literals;
 constexpr std::chrono::nanoseconds timestep(50ms);
 
 int main(int argc, char* argv[]) {
-	if (argc > 2) {
+	if (argc > 1) {
 		//Parse arguments
-		Network::ip = argv[1];
-		Network::port = std::stoi(argv[2]);
+		Network::defaultPort = std::stoi(argv[1]);
 	}
 
     sf::RenderWindow window(sf::VideoMode(width * blockSize * 2, height * blockSize * 2), "Crosser v" + (std::string) CROSSER_VERSION, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);

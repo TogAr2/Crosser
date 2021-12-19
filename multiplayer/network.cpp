@@ -2,39 +2,40 @@
 #include <iostream>
 #include <thread>
 #include "network.hpp"
-#include "../game/game.hpp"
-#include "../render/render.hpp"
 
-std::string Network::ip = "localhost";
-unsigned short Network::port = 3000;
+unsigned short Network::defaultPort = 3020;
 
-bool Network::client = false;
-bool Network::serverUp = false;
+Network::Network(Game* game, sf::TcpSocket* socket) : game(game), clientSocket(socket), client(true), server(false) {
+	clientSocket->setBlocking(false);
+}
 
-sf::TcpSocket* Network::clientSocket = nullptr;
-sf::SocketSelector Network::selector = sf::SocketSelector();
+Network::Network(Game *game): game(game), client(false) {}
 
 void Network::startServer() {
-	client = false;
+	if (client) {
+		std::cout << Logger::error << "Cannot start server: already connected to a server!" << std::endl;
+		return;
+	}
+	if (server) {
+		std::cout << Logger::error << "Cannot start server: already running!" << std::endl;
+		return;
+	}
 
-	std::thread thread([]{
+	std::thread thread([this]{
 		sf::TcpListener listener;
 
-		if (listener.listen(3000) != sf::Socket::Done) {
+		if (listener.listen(Network::defaultPort) != sf::Socket::Done) {
 			std::cerr << Logger::error << "Could not start server!" << std::endl;
 		}
 
 		listener.setBlocking(false);
 
-		serverUp = true;
-		std::cout << Logger::info << "Server started!" << std::endl;
+		server = true;
+		std::cout << Logger::info << "Server started on port " << Network::defaultPort << std::endl;
 
 		selector.add(listener);
 
-		std::optional<Game>* optionalGame = Render::get()->getGame();
-		Game* game = optionalGame->operator->();
-
-		while (serverUp) {
+		while (server) {
 			auto* socket = new sf::TcpSocket();
 
 			if (listener.accept(*socket) == sf::Socket::Done) {
@@ -79,7 +80,11 @@ void Network::startServer() {
 				initialInfo << -1;
 				for (auto &loopX : game->map) {
 					for (auto &loopY : loopX) {
-						initialInfo << crs::to_string(loopY.getType());
+						if (loopY.getType() != crs::AIR) {
+							initialInfo << loopY.getX();
+							initialInfo << loopY.getY();
+							initialInfo << crs::to_string(loopY.getType());
+						}
 					}
 				}
 
@@ -126,8 +131,12 @@ void Network::startServer() {
 	thread.detach();
 }
 
+void Network::stopServer() {
+	server = false;
+}
+
 void Network::sendPacketToAll(sf::Packet & packet, int skip) {
-	for (auto & pair : Render::get()->getGame()->operator->()->players) {
+	for (auto & pair : game->players) {
 		Player* player = pair.second;
 
 		if (skip == player->getId()) continue;
@@ -139,16 +148,17 @@ void Network::sendPacketToAll(sf::Packet & packet, int skip) {
 	}
 }
 
-void Network::connect() {
-	client = true;
-
-	delete clientSocket;
-	clientSocket = new sf::TcpSocket();
-	if (clientSocket->connect(Network::ip, Network::port, sf::seconds(5)) != sf::Socket::Done) {
-		std::cout << Logger::error << "Failed to connect to server!" << std::endl;
+Game* Network::createClient(const std::string &ip, unsigned int port) {
+	auto* socket = new sf::TcpSocket();
+	if (socket->connect(ip, port, sf::seconds(5)) != sf::Socket::Done) {
+		std::cout << Logger::error << "Failed to connect to "  << ip << ":" << port << "!" << std::endl;
+		return nullptr;
 	} else {
-		clientSocket->setBlocking(false);
-		std::cout << Logger::info << "Connected to " << Network::ip << ":" << port << std::endl;
+		std::cout << Logger::info << "Connected to " << ip << ":" << port << std::endl;
+
+		Game* game = new Game(true);
+		game->setNetwork(new Network(game, socket));
+		return game;
 	}
 }
 
@@ -156,19 +166,18 @@ void Network::disconnect() {
 	sf::Packet packet;
 
 	packet << PacketNumber::DISCONNECT;
-	packet << Render::get()->getGame()->operator->()->clientPlayer->getId();
+	packet << game->clientPlayer->getId();
 
 	if (clientSocket->send(packet) != sf::Socket::Done) {
 		std::cout << Logger::info << "Failed to disconnect from server!" << std::endl;
 	} else {
 		std::cout << Logger::info << "Disconnected" << std::endl;
 	}
+
+	client = false;
 }
 
 void Network::receive() {
-	std::optional<Game>* optionalGame = Render::get()->getGame();
-	Game* game = optionalGame->operator->();
-
 	sf::Packet received;
 	int packetNumber, id;
 	if (clientSocket->receive(received) == sf::Socket::Done) {
@@ -176,9 +185,12 @@ void Network::receive() {
 		received >> id;
 
 		if (packetNumber == PacketNumber::INITIAL_INFO) {
+			initialized = true;
+
 			game->players.erase(game->clientPlayer->getId());
 			game->clientPlayer->setId(id);
 			game->players[id] = game->clientPlayer;
+			game->playersMoving[id] = crs::STOP;
 			std::cout << Logger::info << "Got player id " << id << std::endl;
 
 			while (!received.endOfPacket()) {
@@ -199,13 +211,12 @@ void Network::receive() {
 				}
 			}
 
-			for (auto & loopX : game->map) {
-				for (auto & loopY : loopX) {
-					std::string string;
-					received >> string;
-					crs::TileType type = crs::tileTypeValueof(string);
-					loopY.setType(type);
-				}
+			while (!received.endOfPacket()) {
+				int x, y;
+				std::string string;
+				received >> x >> y >> string;
+				crs::TileType type = crs::tileTypeValueof(string);
+				game->map[x][y].setType(type);
 			}
 		} else if (packetNumber == PacketNumber::CONNECT) {
 			std::cout << Logger::info << "New player connected: " << id << std::endl;
@@ -245,9 +256,6 @@ void Network::receive() {
 }
 
 void Network::sendMove(crs::Direction direction) {
-	std::optional<Game>* optionalGame = Render::get()->getGame();
-	Game* game = optionalGame->operator->();
-
 	sf::Packet packet;
 	packet << PacketNumber::MOVE;
 	packet << game->clientPlayer->getId();
@@ -262,9 +270,6 @@ void Network::sendMove(crs::Direction direction) {
 }
 
 void Network::sendTileUpdate(const crs::Location& location, const crs::TileType& type) {
-	std::optional<Game>* optionalGame = Render::get()->getGame();
-	Game* game = optionalGame->operator->();
-
 	sf::Packet packet;
 	packet << PacketNumber::TILE_UPDATE;
 	packet << -1;
@@ -286,4 +291,27 @@ void Network::sendScoreUpdate(sf::TcpSocket *socket, int score) {
 	if (socket->send(packet) != sf::Socket::Done) {
 		std::cout << Logger::error << "Error sending score update packet!" << std::endl;
 	}
+}
+
+bool Network::isClient() const {
+	return client;
+}
+
+bool Network::isServer() const {
+	return server;
+}
+
+bool Network::isInitialized() const {
+	return initialized;
+}
+
+Network::~Network() {
+	if (server) {
+		stopServer();
+	}
+	if (client) {
+		disconnect();
+	}
+
+	delete clientSocket;
 }

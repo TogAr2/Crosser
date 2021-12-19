@@ -1,13 +1,13 @@
 #include "logger.hpp"
 #include "render.hpp"
-#include "mainScreen.hpp"
+#include "screens/mainScreen.hpp"
 
 Render* Render::instance = nullptr;
 
 Render::Render(sf::RenderWindow* window) : window(window) {
 	instance = this;
 
-	if (!mainFont.loadFromFile("/System/Library/Fonts/Courier.dfont")) {
+	if (!mainFont.loadFromFile("resources/Courier.dfont")) {
 		std::cout << Logger::error << " Could not load font!" << std::endl;
 	}
 
@@ -20,6 +20,7 @@ Render::Render(sf::RenderWindow* window) : window(window) {
 Render::~Render() {
 	delete hud;
 	delete gui;
+	delete game;
 }
 
 sf::RenderWindow* &Render::getWindow() {
@@ -34,12 +35,12 @@ Hud* Render::getHud() {
 	return hud;
 }
 
-std::optional<Game>* Render::getGame() {
-	return &game;
+Game* Render::getGame() {
+	return game;
 }
 
 void Render::setGame(Game* game) {
-	Render::game = *game;
+	Render::game = game;
 	resizeQueued = true;
 }
 
@@ -49,6 +50,7 @@ Gui* Render::getGui() {
 
 void Render::setGui(Gui* gui) {
 	delete Render::gui;
+	gui->init(mainFont, window->getSize().x, window->getSize().y);
 	Render::gui = gui;
 }
 
@@ -60,7 +62,7 @@ void Render::draw(float alpha) {
 
 	window->clear(sf::Color::Black);
 
-	if (game.has_value())
+	if (game != nullptr)
 		game->draw(window, alpha);
 
 	window->setView(view);
@@ -73,7 +75,7 @@ void Render::draw(float alpha) {
 void Render::adjustSize(unsigned int windowWidth, unsigned int windowHeight) {
 	view.reset(sf::FloatRect(0, 0, (float) windowWidth, (float) windowHeight));
 
-	if (game.has_value())
+	if (game != nullptr)
 		game->adjustSize(windowWidth, windowHeight);
 	gui->init(mainFont, windowWidth, windowHeight);
 	hud->adjustSize(windowWidth, windowHeight);
@@ -84,7 +86,7 @@ void Render::logic() {
 	sf::Vector2<float> coords = window->mapPixelToCoords(mouse, view);
 	gui->update(coords.x, coords.y);
 
-	if (game.has_value())
+	if (game != nullptr)
 		game->logic();
 }
 
@@ -94,7 +96,11 @@ void Render::input() {
 		if (event.type == sf::Event::KeyPressed) {
 			if (event.key.code == sf::Keyboard::Escape) {
 				window->close();
+			} else {
+				gui->onKeyPress(event.key);
 			}
+		} else if (event.type == sf::Event::TextEntered) {
+			gui->onTextEnter(event.text);
 		} else if (event.type == sf::Event::MouseButtonPressed) {
 			sf::Vector2<int> mouse = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
 			sf::Vector2<float> coords = window->mapPixelToCoords(mouse, view);
@@ -105,7 +111,7 @@ void Render::input() {
 			adjustSize(event.size.width, event.size.height);
 		}
 
-		if (game.has_value())
+		if (game != nullptr)
 			game->onInput(event);
 	}
 }

@@ -10,8 +10,10 @@
 #include "api-utils.hpp"
 #include "IGame.hpp"
 #include "../multiplayer/player.hpp"
-
 #include "../plugins/pluginManager.hpp"
+#include "../multiplayer/network.hpp"
+
+class Network;
 
 class Game : public crs::IGame {
 	int lastId = -1;
@@ -30,6 +32,9 @@ public:
 	Tile map[width][height];
 
 private:
+	Network* network = nullptr;
+	bool client;
+
 	bool gameOver;
 	crs::Location fruitLocation = crs::Location(width / 2, height / 2);
 	float zoom = 0.1;
@@ -47,7 +52,7 @@ private:
 	bool bfs();
 
 public:
-	explicit Game();
+	explicit Game(bool client);
 	~Game();
 
 	void draw(sf::RenderWindow* &window, float alpha);
@@ -68,6 +73,13 @@ public:
 	crs::TileType getTileType(const crs::Location& location);
 
 	Player* newPlayer(crs::Location *location, const sf::Color &color, sf::TcpSocket* socket = nullptr);
+
+	Network *getNetwork() const;
+	void setNetwork(Network *network);
+
+	bool isClient();
+	bool isServer();
+	bool isInitialized();
 };
 
 #endif //CROSSER_GAME_HPP

@@ -1,7 +1,7 @@
 #ifndef CROSSER_MAINSCREEN_HPP
 #define CROSSER_MAINSCREEN_HPP
 
-#include "gui.hpp"
+#include "../gui.hpp"
 
 class MainScreen : public Gui {
 	TextGuiElement* crosserTextElement;
@@ -14,6 +14,8 @@ public:
 
 	void update(float mouseX, float mouseY) override;
 	void draw(sf::RenderWindow* &window, float alpha) const override;
+
+	void onKeyPress(sf::Event::KeyEvent event) override;
 };
 
 #endif //CROSSER_MAINSCREEN_HPP

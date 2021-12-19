@@ -9,7 +9,7 @@ class Render {
 	sf::RenderWindow* window;
 	sf::Font mainFont;
 	sf::View view;
-	std::optional<Game> game;
+	Game* game = nullptr;
 	Hud* hud = nullptr;
 	Gui* gui = nullptr;
 
@@ -28,7 +28,7 @@ public:
 	Gui* getGui();
 	void setGui(Gui* gui);
 
-	std::optional<Game>* getGame();
+	Game* getGame();
 	void setGame(Game* game);
 
 	void draw(float alpha);

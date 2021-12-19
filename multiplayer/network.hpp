@@ -4,6 +4,7 @@
 #include <SFML/Network.hpp>
 #include "api-utils.hpp"
 #include "location.hpp"
+#include "../game/game.hpp"
 
 class PacketNumber {
 public:
@@ -16,27 +17,37 @@ public:
 };
 
 class Network {
-	static sf::TcpSocket* clientSocket;
-	static sf::SocketSelector selector;
+	Game* game;
+
+	sf::TcpSocket* clientSocket = nullptr;
+	sf::SocketSelector selector;
+
+	bool client;
+	bool server = false;
+	bool initialized = false;
 
 public:
-	static std::string ip;
-	static unsigned short port;
+	static unsigned short defaultPort;
 
-	static bool client;
-	static bool serverUp;
+	Network(Game* game, sf::TcpSocket* socket);
+	explicit Network(Game* game);
+	virtual ~Network();
 
-	static void startServer();
-	static void sendPacketToAll(sf::Packet &packet, int skip = -1);
+	void startServer();
+	void stopServer();
+	void sendPacketToAll(sf::Packet &packet, int skip = -1);
 
-	static void connect();
-	static void disconnect();
-	static void receive();
+	static Game* createClient(const std::string &ip, unsigned int port);
+	void disconnect();
+	void receive();
 
-	static void sendMove(crs::Direction direction);
-	static void sendTileUpdate(const crs::Location& location, const crs::TileType& type);
+	void sendMove(crs::Direction direction);
+	void sendTileUpdate(const crs::Location& location, const crs::TileType& type);
 	static void sendScoreUpdate(sf::TcpSocket* socket, int score);
-};
 
+	[[nodiscard]] bool isClient() const;
+	[[nodiscard]] bool isServer() const;
+	[[nodiscard]] bool isInitialized() const;
+};
 
 #endif //CROSSER_NETWORK_HPP

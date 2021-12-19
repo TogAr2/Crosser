@@ -1,6 +1,7 @@
 #include "mainScreen.hpp"
-#include "renderUtils.hpp"
-#include "render.hpp"
+#include "../renderUtils.hpp"
+#include "../render.hpp"
+#include "multiplayerScreen.hpp"
 
 #include <iostream>
 
@@ -27,7 +28,7 @@ void MainScreen::init(const sf::Font &font, unsigned int windowWidth, unsigned i
 	playButton = new ButtonGuiElement(background, playText, [](sf::Mouse::Button button){
 		if (button == sf::Mouse::Button::Left) {
 			Render::get()->setGui(new Gui());
-			Render::get()->setGame(new Game());
+			Render::get()->setGame(new Game(false));
 		}
 	});
 	playButton->setAlpha(0);
@@ -40,7 +41,11 @@ void MainScreen::init(const sf::Font &font, unsigned int windowWidth, unsigned i
 	sf::Text multiplayerText = sf::Text("Multiplayer", font, 24);
 	textBounds = multiplayerText.getLocalBounds();
 	multiplayerText.setPosition((float) windowWidth / 2 - textBounds.width / 2, (float) windowHeight / 2 - textBounds.height / 2 - 8 + 75);
-	multiplayerButton = new ButtonGuiElement(background, multiplayerText);
+	multiplayerButton = new ButtonGuiElement(background, multiplayerText, [](sf::Mouse::Button button){
+		if (button == sf::Mouse::Button::Left) {
+			Render::get()->setGui(new MultiplayerScreen());
+		}
+	});
 	multiplayerButton->setAlpha(0);
 	elements.emplace_back(multiplayerButton);
 }
@@ -48,6 +53,22 @@ void MainScreen::init(const sf::Font &font, unsigned int windowWidth, unsigned i
 void MainScreen::update(float mouseX, float mouseY) {
 	Gui::update(mouseX, mouseY);
 	animationProgress++;
+}
+
+void MainScreen::onKeyPress(sf::Event::KeyEvent event) {
+	Gui::onKeyPress(event);
+
+	if (event.alt && event.code == sf::Keyboard::R) {
+		animationProgress = 0;
+
+		crosserTextElement->setAlpha(0);
+		sf::Vector2f position = crosserTextElement->getText()->getPosition();
+		sf::FloatRect textBounds = crosserTextElement->getText()->getLocalBounds();
+		float halfHeight = textBounds.height / 2;
+		crosserTextElement->getText()->setPosition(position.x, (position.y + halfHeight) * 2 - halfHeight);
+		playButton->setAlpha(0);
+		multiplayerButton->setAlpha(0);
+	}
 }
 
 void MainScreen::draw(sf::RenderWindow* &window, float alpha) const {
